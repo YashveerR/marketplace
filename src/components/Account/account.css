@@ -1,0 +1,45 @@
+.sidebar {
+  max-width: 240px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  height: 98vh;
+  align-content: center;
+}
+
+.btn-new {
+  background-color: transparent;
+  border-color: transparent;
+  color: white;
+  width: auto;
+}
+
+.container-2 {
+  background-image: url("../../assets/accback.jpg");
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding-top: 0;
+  padding-left: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+}
+
+.text-class {
+  font-weight: 900;
+  font-size: large;
+  color: white;
+}
+
+.inputs-adjust {
+  font-size: 14px;
+}
+
+.btn-submit {
+  width: auto;
+}
+
+.checkbox-text {
+  color: white;
+}

@@ -1,0 +1,11 @@
+.btn-new {
+  background-color: transparent;
+  border-color: transparent;
+  color: white;
+  width: auto;
+}
+
+.btn-new:hover {
+  background-color: transparent;
+  color: white;
+}
