@@ -17,6 +17,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/recompose": "^0.30.7",
+    "@types/uuid": "^8.0.0",
     "bootstrap": "^4.5.0",
     "firebase": "^7.16.0",
     "mobx": "^5.15.4",
@@ -28,7 +29,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "recompose": "^0.30.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "uuid": "^8.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

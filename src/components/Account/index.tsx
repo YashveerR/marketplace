@@ -9,6 +9,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
+import MyItems from "../MyItems";
 
 class AccountPage extends Component<any, any> {
   selectedOption: any;
@@ -46,6 +47,9 @@ class AccountPage extends Component<any, any> {
       case 1:
         this.elementDisplay = <div>YOLO 1</div>;
         break;
+      case 2:
+        this.elementDisplay = <MyItems />;
+        break;
       default:
         this.elementDisplay = <div>BROKEN</div>;
         break;
@@ -74,7 +78,7 @@ class AccountPage extends Component<any, any> {
             </Nav>
           </Navbar.Collapse>
         </Navbar>
-        <div>{this.state.viewform ? this.elementDisplay : ""}</div>
+        {this.state.viewform ? this.elementDisplay : ""}
       </div>
     );
   }
@@ -137,8 +141,8 @@ class AccountInfoPage extends Component<any, any> {
 
   render() {
     return (
-      <div>
-        <form onSubmit={this.onSubmit}>
+      <div className="form-height">
+        <form className="form-height" onSubmit={this.onSubmit}>
           <div className="form-row">
             <div className="col-md-4 mb-3 text-class">
               <label htmlFor="validationDefault01">First name</label>
