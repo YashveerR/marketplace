@@ -109,3 +109,26 @@
   background-color: #5f696b;
   color: white;
 }
+
+.toast-edit {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.toast-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.car-edit {
+  display: flex;
+}
+
+.column-edit {
+  margin-top: 10px;
+}
+
+.row-edit {
+  margin: unset;
+}

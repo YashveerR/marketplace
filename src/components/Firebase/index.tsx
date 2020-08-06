@@ -141,14 +141,17 @@ class Firebase {
           switch (error.code) {
             case "storage/unauthorized":
               // User doesn't have permission to access the object
+              reject("storage/unauthorized");
               break;
 
             case "storage/canceled":
               // User canceled the upload
+              reject("storage/canceled");
               break;
 
             case "storage/unknown":
               // Unknown error occurred, inspect error.serverResponse
+              reject("storage/unknown");
               break;
           }
         },
@@ -174,7 +177,7 @@ class Firebase {
     itemCategory: any,
     imgArr: any
   ) {
-    this.db.collection("items").doc().set(
+    return this.db.collection("items").doc().set(
       {
         author: uId,
         Title: itemTitle,
@@ -190,7 +193,7 @@ class Firebase {
   }
 
   readUserItems(uId: any) {
-    return this.db.collection("items").where("creator", "==", uId).get();
+    return this.db.collection("items").where("author", "==", uId).get();
   }
 
   doSendEmailVerification = () =>

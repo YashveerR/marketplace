@@ -5,13 +5,20 @@ import { withAuthorization, withEmailVerification } from "../Session";
 import { withFirebase } from "../Firebase";
 import "./myitems.css";
 import { STORECATS } from "../../constants/storeCats";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class MyItems extends Component<any, any> {
   test_prop: any;
+
   constructor(props: any) {
     super(props);
     this.state = {
       viewform: false,
+      toastresponse: "",
+      toaststyle: false,
+      myItems: [],
+      itemsDL: false,
     };
   }
 
@@ -20,13 +27,27 @@ class MyItems extends Component<any, any> {
       viewform: !this.state.viewform,
     });
   }
+  toastmessage = (datafromchild: any) => {
+    this.setState({ toastresponse: datafromchild });
+  };
+
+  toastresult = (datafromchild: any) => {
+    this.setState({ toaststyle: datafromchild });
+    this.state.toaststyle
+      ? toast.success(this.state.toastresponse)
+      : toast.error(this.state.toastresponse);
+  };
+
   componentDidMount() {
+    let tempArr: any[] = [];
     //retrieve user items from firebase
     this.props.firebase
       .readUserItems(this.props.firebase.auth.currentUser["uid"])
       .then((doc: any) => {
         doc.forEach((element: any) => {
-          console.log("retrieved items from FB", element.data());
+          tempArr.push(element.data());
+          this.setState({ myItems: tempArr });
+          this.setState({ itemsDL: true });
         });
       });
   }
@@ -36,28 +57,32 @@ class MyItems extends Component<any, any> {
   render() {
     return (
       <>
-        <div className="card card-widths">
-          <img src="..." className="card-img-top" alt="..."></img>
-          <div className="card-body">
-            <h5 className="card-title">Card title</h5>
-            <p className="card-text">
-              Some quick example text to build on the card title and make up the
-              bulk of the card's content.
-            </p>
-            <ul className="list-group list-group-flush">
-              <li className="list-group-item">Cras justo odio</li>
-              <li className="list-group-item">Dapibus ac facilisis in</li>
-              <li className="list-group-item">Vestibulum at eros</li>
-            </ul>
-          </div>
-          <div className="card-body">
-            <a href="/" className="card-link">
-              Card link
-            </a>
-            <a href="/" className="card-link">
-              Another link
-            </a>
-          </div>
+        <div className="row row-edit">
+          {this.state.itemsDL
+            ? this.state.myItems.map((data: any, index: any) => {
+                return (
+                  <div key={index} className="col-sm-3 column-edit">
+                    <div className="card ">
+                      <img
+                        src={data.ImgLink0}
+                        className="card-img-top"
+                        alt="..."
+                      ></img>
+                      <div className="card-body">
+                        <h5 className="card-title">{data.Title} </h5>
+                        <p className="card-text"></p>
+                        <a href="/" className="card-link">
+                          Edit Item
+                        </a>
+                        <a href="/" className="card-link">
+                          Delete Item
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            : ""}
         </div>
         <button
           onClick={this.viewNewItemForm.bind(this)}
@@ -71,8 +96,25 @@ class MyItems extends Component<any, any> {
           <PopupBox
             text="Close Me"
             closePopup={this.viewNewItemForm.bind(this)}
+            toastRetval={this.toastmessage}
+            toastType={this.toastresult}
           />
         ) : null}
+        <div>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+          {/* Same as */}
+          <ToastContainer />
+        </div>
       </>
     );
   }
@@ -108,10 +150,28 @@ class Popup extends React.Component<any, any> {
       tempArr.map(async (image: any) => {
         return await this.props.firebase.createImages(image);
       })
-    ).then((value: any) => {
-      console.log(value);
-    });
-    console.log("Promises resolved ", p);
+    ).then(
+      (value: any) => {
+        console.log(value);
+        this.props.firebase
+          .createUserItem(
+            this.props.firebase.auth.currentUser["uid"],
+            this.state.itemTitle,
+            this.state.itemDesc,
+            this.state.itemPrice,
+            this.state.itemCategory,
+            value
+          )
+          .then(() => {
+            this.props.toastRetval("Data Successfully Uploaded");
+            this.props.toastType(true);
+          });
+      },
+      (nonValue) => {
+        this.props.toastRetval(nonValue);
+        this.props.toastType(false);
+      }
+    );
 
     return this.props.closePopup(true);
   };
