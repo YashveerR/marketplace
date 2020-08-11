@@ -25,6 +25,7 @@ class Firebase {
   googleProvider: app.auth.GoogleAuthProvider;
   facebookProvider: app.auth.FacebookAuthProvider;
   twitterProvider: app.auth.TwitterAuthProvider;
+  callBack: any;
 
   constructor() {
     app.initializeApp(config);
@@ -115,58 +116,64 @@ class Firebase {
       },
     };
     return new Promise(function (resolve, reject) {
-      let uploadTask = storageRef
-        .child("itemImage/" + uId + "/" + uuidv4())
-        .put(image, metadata);
-      // Listen for state changes, errors, and completion of the upload.
-      uploadTask.on(
-        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-        function (snapshot: any) {
-          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-          var progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-          switch (snapshot.state) {
-            case firebase.storage.TaskState.PAUSED: // or 'paused'
-              console.log("Upload is paused");
-              break;
-            case firebase.storage.TaskState.RUNNING: // or 'running'
-              console.log("Upload is running");
-              break;
+      if (image === "") {
+        retImageArr.push("");
+
+        resolve(retImageArr);
+      } else {
+        let uploadTask = storageRef
+          .child("itemImage/" + uId + "/" + uuidv4())
+          .put(image, metadata);
+        // Listen for state changes, errors, and completion of the upload.
+        uploadTask.on(
+          firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+          function (snapshot: any) {
+            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+            var progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+            switch (snapshot.state) {
+              case firebase.storage.TaskState.PAUSED: // or 'paused'
+                //console.log("Upload is paused");
+                break;
+              case firebase.storage.TaskState.RUNNING: // or 'running'
+                // console.log("Upload is running");
+                break;
+            }
+          },
+          function (error: any) {
+            // A full list of error codes is available at
+            // https://firebase.google.com/docs/storage/web/handle-errors
+            switch (error.code) {
+              case "storage/unauthorized":
+                // User doesn't have permission to access the object
+                reject("storage/unauthorized");
+                break;
+
+              case "storage/canceled":
+                // User canceled the upload
+                reject("storage/canceled");
+                break;
+
+              case "storage/unknown":
+                // Unknown error occurred, inspect error.serverResponse
+                reject("storage/unknown");
+                break;
+            }
+          },
+          function () {
+            // Upload completed successfully, now we can get the download URL
+            uploadTask.snapshot.ref
+              .getDownloadURL()
+              .then(function (downloadURL: any) {
+                //console.log("File available at", downloadURL);
+                retImageArr.push(downloadURL);
+
+                resolve(retImageArr);
+              });
           }
-        },
-        function (error: any) {
-          // A full list of error codes is available at
-          // https://firebase.google.com/docs/storage/web/handle-errors
-          switch (error.code) {
-            case "storage/unauthorized":
-              // User doesn't have permission to access the object
-              reject("storage/unauthorized");
-              break;
-
-            case "storage/canceled":
-              // User canceled the upload
-              reject("storage/canceled");
-              break;
-
-            case "storage/unknown":
-              // Unknown error occurred, inspect error.serverResponse
-              reject("storage/unknown");
-              break;
-          }
-        },
-        function () {
-          // Upload completed successfully, now we can get the download URL
-          uploadTask.snapshot.ref
-            .getDownloadURL()
-            .then(function (downloadURL: any) {
-              console.log("File available at", downloadURL);
-              retImageArr.push(downloadURL);
-
-              resolve(retImageArr);
-            });
-        }
-      );
+        );
+      }
     });
   }
   createUserItem(
@@ -175,6 +182,7 @@ class Firebase {
     itemDesc: any,
     itemPrice: any,
     itemCategory: any,
+    itemStatus: any,
     imgArr: any
   ) {
     return this.db.collection("items").doc().set(
@@ -184,6 +192,31 @@ class Firebase {
         Desc: itemDesc,
         Price: itemPrice,
         Cat: itemCategory,
+        Status: itemStatus,
+        ImgLink0: imgArr[0],
+        ImgLink1: imgArr[1],
+        ImgLink2: imgArr[2],
+      },
+      { merge: true }
+    );
+  }
+
+  updateUserItem(
+    docId: any,
+    itemTitle: any,
+    itemDesc: any,
+    itemPrice: any,
+    itemCategory: any,
+    itemStatus: any,
+    imgArr: any
+  ) {
+    return this.db.collection("items").doc(docId).set(
+      {
+        Title: itemTitle,
+        Desc: itemDesc,
+        Price: itemPrice,
+        Cat: itemCategory,
+        Status: itemStatus,
         ImgLink0: imgArr[0],
         ImgLink1: imgArr[1],
         ImgLink2: imgArr[2],
@@ -194,6 +227,14 @@ class Firebase {
 
   readUserItems(uId: any) {
     return this.db.collection("items").where("author", "==", uId).get();
+  }
+
+  readUserItem(docId: any) {
+    return this.db.collection("items").doc(docId).get();
+  }
+
+  doUnsubListener() {
+    this.callBack();
   }
 
   doSendEmailVerification = () =>

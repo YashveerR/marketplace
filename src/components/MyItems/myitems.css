@@ -58,10 +58,10 @@
 }
 .popup_inner {
   position: absolute;
-  left: 15%;
-  right: 15%;
-  top: 15%;
-  bottom: 15%;
+  left: 1%;
+  right: 1%;
+  top: 1%;
+  bottom: 1%;
   margin: auto;
   background: white;
   padding: 10px;
@@ -90,7 +90,7 @@
 }
 
 .file {
-  width: 75%;
+  width: 50%;
   border: 1px solid #bbb;
   color: #888;
   padding: 5px;
@@ -131,4 +131,28 @@
 
 .row-edit {
   margin: unset;
+}
+
+.textarea {
+  resize: none;
+}
+
+.col-container {
+  display: grid;
+  justify-content: center;
+}
+
+.img-thumbs-edit {
+  height: 100px;
+  width: 100px;
+  padding: unset;
+}
+
+.check-box-edit {
+  margin-left: unset;
+  width: unset;
+}
+
+.check-lbl-edit {
+  margin-left: 20px;
 }

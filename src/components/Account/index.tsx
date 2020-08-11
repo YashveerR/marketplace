@@ -106,7 +106,6 @@ class AccountInfoPage extends Component<any, any> {
       this.props.firebase
         .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
         .then((_doc: any) => {
-          console.log(_doc.data().name);
           this.setState({ name: _doc.data().name });
           this.setState({ lastname: _doc.data().lastname });
           this.setState({ email: _doc.data().email });
