@@ -122,7 +122,7 @@ class Firebase {
         resolve(retImageArr);
       } else {
         let uploadTask = storageRef
-          .child("itemImage/" + uId + "/" + uuidv4())
+          .child(`itemImage/${uId}/${uuidv4()}`)
           .put(image, metadata);
         // Listen for state changes, errors, and completion of the upload.
         uploadTask.on(
@@ -233,6 +233,10 @@ class Firebase {
     return this.db.collection("items").doc(docId).get();
   }
 
+  async readAllItems() {
+    return this.db.collection("items").get();
+  }
+
   doUnsubListener() {
     this.callBack();
   }
@@ -269,6 +273,20 @@ class Firebase {
         fallback();
       }
     });
+  }
+
+  async deleteUserItem(docId: any, img0: any, img1: any, img2: any) {
+    //delete the images as well
+    //get the image refs...
+    var imgRef0 = this.store.refFromURL(img0[0]);
+    var imgRef1 = this.store.refFromURL(img1[0]);
+    var imgRef2 = this.store.refFromURL(img2[0]);
+
+    imgRef0.delete();
+    imgRef1.delete();
+    imgRef2.delete();
+
+    await this.db.collection("items").doc(docId).delete();
   }
 
   user = (uid: any) => this.db.doc(`users/${uid}`);

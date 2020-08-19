@@ -1,0 +1,265 @@
+import React, { Component } from "react";
+import { inject, observer } from "mobx-react";
+import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
+import { withFirebase } from "../Firebase";
+import NavResult from "../Navbar";
+import "./search.css";
+import { css } from "@emotion/core";
+import PacmanLoader from "react-spinners/PacmanLoader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+class Search extends Component<any, any> {
+  override = css`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+  `;
+  element: any;
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      filterPrice: "",
+      allItems: [],
+      filtItems: [],
+      showSpinner: true,
+      items: [],
+      hasMore: true,
+      itemCounter: 0,
+    };
+    this.element = React.createRef();
+    this.handleScroll = this.handleScroll.bind(this);
+    this.fetchMoreData = this.fetchMoreData.bind(this);
+  }
+
+  handleScroll(event: any) {
+    if (
+      event.target.scrollingElement.scrollHeight -
+        event.target.scrollingElement.scrollTop ===
+      event.target.scrollingElement.clientHeight
+    ) {
+      console.log("bottom of screen reached more required....");
+      this.fetchMoreData();
+    }
+  }
+
+  onChange = (event: any) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  handleClick(event: any) {
+    console.log(event);
+  }
+
+  fetchMoreData = () => {
+    let tempArr: any[] = [...this.state.filtItems];
+    var tempz: any[] = [];
+    var temps: any[] = [];
+    this.state.filtItems.length - this.state.itemCounter > 48
+      ? this.setState({ itemCounter: this.state.itemCounter + 48 })
+      : this.setState({
+          itemCounter: this.state.filtItems.length - this.state.itemCounter,
+        });
+
+    temps = tempArr.splice(this.state.items.length, this.state.itemCounter);
+
+    this.setState({
+      items: tempz.concat(temps),
+    });
+  };
+
+  async componentDidMount() {
+    let allDataList: any[] = [];
+    let filteredList: any[] = [];
+    const { fromNotifications } = this.props.location.state;
+
+    var results = await this.props.firebase
+      .readAllItems()
+      .then((allItems: any) => {
+        //store the entire dataset locally in the event that it requires to be used
+        //again...therefore saving on DB reads...
+        allItems.forEach((data: any) => {
+          allDataList.push(data.data());
+        });
+        this.setState({ allItems: allDataList });
+        filteredList = allDataList.filter((filt: any) => {
+          return (
+            filt.Title.includes(fromNotifications) ||
+            filt.Desc.includes(fromNotifications)
+          );
+        });
+        this.setState({ filtItems: filteredList });
+      })
+      .then(() => {
+        this.setState({ showSpinner: false });
+        this.fetchMoreData();
+      });
+    console.log(
+      "checking props",
+      fromNotifications,
+      filteredList,
+      this.state.filtItems
+    );
+
+    window.addEventListener("scroll", this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
+  }
+
+  render() {
+    return (
+      <>
+        <div className="contain-div">
+          <div>
+            <NavResult />
+          </div>
+          <div className="component-z">
+            <form>
+              <div className="container ">
+                <div className="row no-gutters">
+                  <div className="col-sm-10 col-edits">
+                    <input
+                      name="searchInput"
+                      className="form-control input-edit textarea"
+                      type="search"
+                      id="searchInput"
+                      onChange={this.onChange}
+                      value={this.state.searchInput}
+                      placeholder="Enter Search Item here"
+                    ></input>
+                  </div>
+                  <div className="col-sm-2">
+                    <button className="btn btn-info btn-edits" type="submit">
+                      Search
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h1 className="header3 spacers">Search Results</h1>
+            <ColoredLine />
+          </div>
+          <div>
+            <PacmanLoader
+              size={35}
+              color={"#000000"}
+              loading={this.state.showSpinner}
+              css={this.override}
+            />
+          </div>
+          <div>
+            {this.state.showSpinner === false ? (
+              <>
+                {this.state.filtItems.length > 0 ? (
+                  <>
+                    <div className="row srwedit">
+                      <div className="col-sm-5">
+                        Found: {this.state.filtItems.length} Items.
+                      </div>
+                      <div className="col-sm-7 col-editing">
+                        <div className="dropdown">
+                          <button
+                            type="button"
+                            className="dropdown-toggle dropdwn-edit unstyled-button"
+                            data-toggle="dropdown"
+                            id="dropdownMenu2"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                          >
+                            Filter
+                          </button>
+                          <div
+                            className="dropdown-menu"
+                            aria-labelledby="dropdownMenu2"
+                          >
+                            <button className="dropdown-item" type="button">
+                              <FontAwesomeIcon icon={faDollarSign} />
+                              Price: Low to High
+                            </button>
+                            <button className="dropdown-item" type="button">
+                              <FontAwesomeIcon icon={faDollarSign} />
+                              Price: High to Low
+                            </button>
+                            <button className="dropdown-item" type="button">
+                              <FontAwesomeIcon icon={faStar} />
+                              Premium Listings
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div ref={this.element}>
+                      <div className="row row-edit">
+                        {this.state.items.map((data: any, index: any) => {
+                          return (
+                            <div key={index}>
+                              <div key={index} className="col-sm-4 column-edit">
+                                <div
+                                  key={index}
+                                  className="card container-card"
+                                  onClick={() => this.handleClick(data)}
+                                >
+                                  <img
+                                    src={data.ImgLink0}
+                                    className="card-img-top"
+                                    alt="..."
+                                  ></img>
+                                  <div className="card-body">
+                                    <h5 className="card-title">{data.Title}</h5>
+                                    <h5 className="card-title">
+                                      R {data.Price}/day
+                                    </h5>
+                                  </div>
+                                  <div className="middle">
+                                    <div className="text">View</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="header3 central">
+                      No Items Matching that Description ...
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+}
+
+const ColoredLine = ({ color }: any) => (
+  <hr
+    style={{
+      color: color,
+      backgroundColor: color,
+      height: 5,
+      marginTop: 0,
+    }}
+  />
+);
+
+export default compose(
+  inject("sessionStore"),
+  observer,
+  withRouter,
+  withFirebase
+)(Search);

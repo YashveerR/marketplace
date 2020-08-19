@@ -5,6 +5,8 @@ import PasswordForgetPage from "../src/components/PasswordForget";
 import HomePage from "../src/components/Home";
 import AccountPage from "../src/components/Account";
 import AdminPage from "../src/components/Admin";
+import Search from "../src/components/Search";
+
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import * as ROUTES from "../src/constants/routes";
 import { withAuthentication } from "../src/components/Session";
@@ -17,6 +19,7 @@ const App = () => (
       <Route path={ROUTES.SIGN_IN} component={SignInPage} />
       <Route path={ROUTES.ACCOUNT} component={AccountPage} />
       <Route path={ROUTES.ADMIN} component={AdminPage} />
+      <Route path={ROUTES.SEARCH} component={Search} />
     </Switch>
   </BrowserRouter>
 );

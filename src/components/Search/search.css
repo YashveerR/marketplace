@@ -1,0 +1,58 @@
+.component-z {
+  z-index: 1;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 40%;
+}
+
+.btn-edits {
+  padding: 9px;
+}
+
+.col-edits {
+  padding-top: 5px;
+}
+
+.header3 {
+  text-align: center;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 65px;
+  letter-spacing: 0.2em;
+  color: black;
+  padding: 0;
+  margin: 0;
+}
+
+.central {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+
+.scroll-css {
+  height: 100vh;
+  overflow: auto;
+}
+
+.dropdwn-edit {
+  width: unset;
+}
+
+.srwedit {
+  margin: unset;
+}
+
+.unstyled-button {
+  border: black;
+  padding: 0;
+  background: none;
+}
+
+.col-editing {
+  display: flex;
+  justify-content: center;
+}

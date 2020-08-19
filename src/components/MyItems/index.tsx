@@ -12,6 +12,8 @@ class MyItems extends Component<any, any> {
   test_prop: any;
   db: any;
   unsubscribe: any;
+  deleted_value: any;
+  deletedDoc: any;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -26,6 +28,7 @@ class MyItems extends Component<any, any> {
     };
 
     this.db = this.props.firebase.db;
+    this.delItem = this.delItem.bind(this);
   }
 
   viewNewItemForm() {
@@ -33,6 +36,7 @@ class MyItems extends Component<any, any> {
       viewform: !this.state.viewform,
     });
   }
+
   viewEditForm(e: any) {
     this.setState({
       itemIndexToEdit: this.state.docIds[e],
@@ -46,6 +50,16 @@ class MyItems extends Component<any, any> {
       viewFormEdit: !this.state.viewFormEdit,
     });
   }
+
+  delItem(e: any) {
+    this.props.firebase.deleteUserItem(
+      this.state.docIds[e],
+      this.state.myItems[e].ImgLink0,
+      this.state.myItems[e].ImgLink1,
+      this.state.myItems[e].ImgLink2
+    );
+  }
+
   toastmessage = (datafromchild: any) => {
     this.setState({ toastresponse: datafromchild });
   };
@@ -77,6 +91,19 @@ class MyItems extends Component<any, any> {
           if (change.type === "modified") {
           }
           if (change.type === "removed") {
+            this.deleted_value = change.doc.id;
+            this.deletedDoc = change.doc.data();
+
+            tempIds = this.state.docIds.filter(
+              (id: any) => id !== this.deleted_value
+            );
+            console.log("post filter ID's", tempIds);
+            tempArr = this.state.myItems.filter(
+              (data: any) => data.Title !== this.deletedDoc.Title
+            );
+            console.log("post filter ID's", tempArr);
+            this.setState({ docIds: tempIds });
+            this.setState({ myItems: tempArr });
           }
         });
       });
@@ -112,15 +139,18 @@ class MyItems extends Component<any, any> {
                         >
                           Edit Item
                         </button>
-                        <a href="/" className="card-link">
+                        <button
+                          className="btn"
+                          onClick={() => this.delItem(index)}
+                        >
                           Delete Item
-                        </a>
+                        </button>
                       </div>
                     </div>
                   </div>
                 );
               })
-            : ""}
+            : "Well thisd is awkward... Ermmmmm"}
         </div>
         <button
           onClick={this.viewNewItemForm.bind(this)}
@@ -205,7 +235,6 @@ class Popup extends React.Component<any, any> {
         this.setState({ itemPrice: doc.data().Price });
         this.setState({ itemCategory: doc.data().Cat });
         this.setState({ publicItem: doc.data().Status });
-        console.log(doc.data().ImgLink0);
         this.setState({ img0: doc.data().ImgLink0 });
         this.setState({ img1: doc.data().ImgLink1 });
         this.setState({ img2: doc.data().ImgLink2 });
@@ -220,9 +249,14 @@ class Popup extends React.Component<any, any> {
       this.state.fileThree,
     ];
 
-    var p = Promise.all(
+    Promise.all(
       tempArr.map(async (image: any) => {
-        return await this.props.firebase.createImages(image);
+        return await this.props.firebase.createImages(
+          image,
+          this.props.firebase.auth.currentUser["uid"],
+          this.state.itemTitle,
+          this.state.itemCategory
+        );
       })
     ).then(
       (value: any) => {

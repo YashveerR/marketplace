@@ -8,4 +8,6 @@ export const STORECATS = [
   "Toys",
   "Entertainment",
   "Books",
+  "Gaming",
+  "Stationary and Crafts",
 ];
