@@ -15,3 +15,5 @@ export const TOYS = "/toys";
 export const ENTERTAIN = "/entertain";
 export const BOOKS = "/books";
 export const CRAFT = "/craft";
+export const VIEWITEM = "/itemview";
+export const MYITEMS = "/mycart";

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { withRouter, Link } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import "./signin.css";
 import { SignUpLink } from "../SignUp";

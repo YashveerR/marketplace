@@ -3,7 +3,6 @@ import { inject, observer } from "mobx-react";
 import { compose } from "recompose";
 import { withRouter } from "react-router-dom";
 import { withFirebase } from "../Firebase";
-import AuthUserContext from "./context";
 
 const withAuthentication = (Component: any) => {
   class WithAuthentication extends React.Component<any, any> {

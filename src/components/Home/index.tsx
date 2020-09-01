@@ -138,4 +138,9 @@ class Home extends Component<any, any> {
   }
 }
 
-export default compose(inject("sessionStore"), observer, withRouter)(Home);
+export default compose(
+  inject("sessionStore"),
+  inject("itemStore"),
+  observer,
+  withRouter
+)(Home);

@@ -241,6 +241,16 @@ class Firebase {
     this.callBack();
   }
 
+  readItemDates(docId: any) {
+    return this.db
+      .collection("items")
+      .doc(docId)
+      .collection("itemDates", (ref: any) =>
+        ref.where("startTime", ">=", this.dateCalc()).orderBy("startTime")
+      )
+      .get();
+  }
+
   doSendEmailVerification = () =>
     firebase.auth().currentUser?.sendEmailVerification({
       url: process.env.REACT_APP_CONFIRMATION_EMAIL_REDIRECT || "",
@@ -288,7 +298,14 @@ class Firebase {
 
     await this.db.collection("items").doc(docId).delete();
   }
+  dateCalc() {
+    var getDays = new Date().getDate();
+    var getYr = new Date().getFullYear();
+    var getMonth = new Date().getMonth();
+    var datum = new Date(getYr, getMonth, getDays);
 
+    return datum;
+  }
   user = (uid: any) => this.db.doc(`users/${uid}`);
 
   users = () => this.db.collection("users");

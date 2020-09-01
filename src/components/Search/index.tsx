@@ -10,6 +10,8 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
+import FadeIn from "react-fade-in";
+
 class Search extends Component<any, any> {
   override = css`
     position: absolute;
@@ -18,6 +20,7 @@ class Search extends Component<any, any> {
     transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
   `;
+  showArryList: any[] = [];
   element: any;
   constructor(props: any) {
     super(props);
@@ -29,10 +32,13 @@ class Search extends Component<any, any> {
       items: [],
       hasMore: true,
       itemCounter: 0,
+      loaded: [],
+      itemIds: [],
     };
     this.element = React.createRef();
     this.handleScroll = this.handleScroll.bind(this);
     this.fetchMoreData = this.fetchMoreData.bind(this);
+    this.showImage = this.showImage.bind(this);
   }
 
   handleScroll(event: any) {
@@ -50,8 +56,12 @@ class Search extends Component<any, any> {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  handleClick(event: any) {
-    console.log(event);
+  handleClick(event: any, index: any) {
+    console.log("event click on card");
+    this.props.history.push("/itemview", {
+      fromNotifications: event,
+      selectedID: this.state.itemIds[index],
+    });
   }
 
   fetchMoreData = () => {
@@ -83,6 +93,7 @@ class Search extends Component<any, any> {
         //again...therefore saving on DB reads...
         allItems.forEach((data: any) => {
           allDataList.push(data.data());
+          this.state.itemIds.push(data.id);
         });
         this.setState({ allItems: allDataList });
         filteredList = allDataList.filter((filt: any) => {
@@ -110,6 +121,12 @@ class Search extends Component<any, any> {
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
   }
+
+  showImage = (event: any) => {
+    this.showArryList[event] = true;
+
+    this.setState({ loaded: this.showArryList });
+  };
 
   render() {
     return (
@@ -157,7 +174,7 @@ class Search extends Component<any, any> {
           <div>
             {this.state.showSpinner === false ? (
               <>
-                {this.state.filtItems.length > 0 ? (
+                {this.state.items.length > 0 ? (
                   <>
                     <div className="row srwedit">
                       <div className="col-sm-5">
@@ -200,28 +217,45 @@ class Search extends Component<any, any> {
                         {this.state.items.map((data: any, index: any) => {
                           return (
                             <div key={index}>
-                              <div key={index} className="col-sm-4 column-edit">
+                              <FadeIn>
                                 <div
                                   key={index}
-                                  className="card container-card"
-                                  onClick={() => this.handleClick(data)}
+                                  className="col-sm-4 column-edit"
                                 >
-                                  <img
-                                    src={data.ImgLink0}
-                                    className="card-img-top"
-                                    alt="..."
-                                  ></img>
-                                  <div className="card-body">
-                                    <h5 className="card-title">{data.Title}</h5>
-                                    <h5 className="card-title">
-                                      R {data.Price}/day
-                                    </h5>
-                                  </div>
-                                  <div className="middle">
-                                    <div className="text">View</div>
+                                  <div
+                                    key={index}
+                                    className="card container-card"
+                                    onClick={() =>
+                                      this.handleClick(data, index)
+                                    }
+                                  >
+                                    <img
+                                      src={data.ImgLink0}
+                                      className="figure-img img-fluid rounded"
+                                      alt="A "
+                                      onLoad={() => this.showImage(index)}
+                                    ></img>
+
+                                    {this.state.loaded[index] ? (
+                                      <div>
+                                        <div className="card-body">
+                                          <h5 className="card-title">
+                                            {data.Title}
+                                          </h5>
+                                          <h5 className="card-title">
+                                            R {data.Price}/day
+                                          </h5>
+                                        </div>
+                                        <div className="middle">
+                                          <div className="text">View</div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div></div>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
+                              </FadeIn>
                             </div>
                           );
                         })}
@@ -257,8 +291,10 @@ const ColoredLine = ({ color }: any) => (
   />
 );
 
+export { ColoredLine };
 export default compose(
   inject("sessionStore"),
+  inject("itemStore"),
   observer,
   withRouter,
   withFirebase
