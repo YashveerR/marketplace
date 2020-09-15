@@ -10,6 +10,7 @@ import Navbar from "react-bootstrap/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 import MyItems from "../MyItems";
+import MyOrders from "../MyOrders";
 
 class AccountPage extends Component<any, any> {
   selectedOption: any;
@@ -45,7 +46,11 @@ class AccountPage extends Component<any, any> {
         );
         break;
       case 1:
-        this.elementDisplay = <div>YOLO 1</div>;
+        this.elementDisplay = (
+          <div>
+            <MyOrders />
+          </div>
+        );
         break;
       case 2:
         this.elementDisplay = <MyItems />;
@@ -153,7 +158,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="First name"
                 required
                 onChange={this.onChange}
-                value={this.state.name}
+                value={this.state.name || ""}
               ></input>
             </div>
             <div className="col-md-4 mb-3 text-class">
@@ -166,7 +171,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="Last name"
                 required
                 onChange={this.onChange}
-                value={this.state.lastname}
+                value={this.state.lastname || ""}
               ></input>
             </div>
           </div>
@@ -188,7 +193,7 @@ class AccountInfoPage extends Component<any, any> {
                   aria-describedby="inputGroupPrepend2"
                   required
                   onChange={this.onChange}
-                  value={this.state.email}
+                  value={this.state.email || ""}
                 ></input>
               </div>
             </div>
@@ -203,7 +208,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="0123456789"
                 required
                 onChange={this.onChange}
-                value={this.state.number}
+                value={this.state.number || ""}
               ></input>
             </div>
           </div>
@@ -218,7 +223,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="Address"
                 required
                 onChange={this.onChange}
-                value={this.state.address}
+                value={this.state.address || ""}
               ></input>
             </div>
             <div className="col-md-4 mb-3 text-class">
@@ -231,7 +236,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="Province"
                 required
                 onChange={this.onChange}
-                value={this.state.suburb}
+                value={this.state.suburb || ""}
               ></input>
             </div>
           </div>
@@ -246,7 +251,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="Province"
                 required
                 onChange={this.onChange}
-                value={this.state.province}
+                value={this.state.province || ""}
               ></input>
             </div>
             <div className="col-md-4 mb-3 text-class">
@@ -260,7 +265,7 @@ class AccountInfoPage extends Component<any, any> {
                 placeholder="Area Code"
                 required
                 onChange={this.onChange}
-                value={this.state.areacode}
+                value={this.state.areacode || ""}
               ></input>
             </div>
           </div>
@@ -275,7 +280,7 @@ class AccountInfoPage extends Component<any, any> {
                   className="form-check-input btn-submit"
                   id="invalidCheck2"
                   onChange={this.onChange}
-                  value={this.state.terms}
+                  value={this.state.terms || ""}
                   checked={true}
                 ></input>
                 <label

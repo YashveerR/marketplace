@@ -8,6 +8,9 @@ import "./displayitem.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus } from "@fortawesome/free-solid-svg-icons";
+import { withFirebase } from "../Firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class DisplayItem extends Component<any, any> {
   constructor(props: any) {
@@ -29,6 +32,7 @@ class DisplayItem extends Component<any, any> {
       tempSDate: new Date(),
       tempEDate: null,
       allItemDates: [],
+      exclusionDates: [],
     };
     this.addToCart = this.addToCart.bind(this);
   }
@@ -37,15 +41,19 @@ class DisplayItem extends Component<any, any> {
   //just store in the states and load the information on the page.. with date picker....
 
   componentDidMount() {
-    console.log(
-      "Props from other page",
-      this.props.location.state.fromNotifications
-    );
+    let tempDates: Date[] = [];
     this.setState({ data: this.props.location.state.fromNotifications });
 
     this.props.firebase
       .readItemDates(this.props.location.state.selectedID)
-      .then();
+      .then((data: any) => {
+        data.forEach((items: any) => {
+          tempDates.push(items.data()["startDate"].toDate());
+          tempDates.push(items.data()["endDate"].toDate());
+          this.setState({ exclusionDates: tempDates });
+          console.log("exclusion dates ", items.data()["startDate"].toDate());
+        });
+      });
   }
 
   handleChange = (date: any) => {
@@ -68,18 +76,27 @@ class DisplayItem extends Component<any, any> {
         new Date(
           this.state.startDate.getFullYear(),
           this.state.startDate.getMonth(),
-          this.state.startDate.getDate()
+          this.state.startDate.getDate(),
+          0
         ),
         new Date(
           this.state.endDate.getFullYear(),
           this.state.endDate.getMonth(),
-          this.state.endDate.getDate()
+          this.state.endDate.getDate(),
+          0
         ),
         this.props.location.state.selectedID
       )
     );
 
+    if (this.props.itemStore.listError === "duplicate item") {
+      toast.error("🕷 Error detected in basket");
+    } else {
+      toast.warn("Successfully added item to basket ");
+    }
     //this.props.itemStore.empty();
+    //set this state to true so we can display a navigate to cart button.....
+    this.setState({ itemsInCart: true });
   }
 
   componentDidUpdate(props: any) {
@@ -87,7 +104,6 @@ class DisplayItem extends Component<any, any> {
   }
 
   render() {
-    console.log("render list", this.props.itemStore.itemList);
     return (
       <>
         <div className="contain-div">
@@ -128,6 +144,8 @@ class DisplayItem extends Component<any, any> {
                     selected={this.state.startDate}
                     onChange={(sDate) => this.handleChange(sDate)}
                     popperPlacement="bottom"
+                    excludeDates={this.state.exclusionDates}
+                    minDate={new Date()}
                     popperModifiers={{
                       flip: {
                         behavior: ["bottom"], // don't allow it to flip to be above
@@ -146,7 +164,9 @@ class DisplayItem extends Component<any, any> {
                   <DatePicker
                     selected={this.state.endDate}
                     onChange={this.handleChangeEnd}
+                    minDate={new Date()}
                     popperPlacement="bottom"
+                    excludeDates={this.state.exclusionDates}
                     popperModifiers={{
                       flip: {
                         behavior: ["bottom"], // don't allow it to flip to be above
@@ -171,8 +191,37 @@ class DisplayItem extends Component<any, any> {
               <div className="terms"> Delivery Terms </div>
               <div className="itemDesc"> Rental Policy and Terms</div>
               <div className="terms"> Rental Policy and Terms</div>
+              <div>
+                {this.props.itemStore.itemList.length > 0 ? (
+                  <ul>
+                    <li className="nav-item blink-edit">
+                      <a
+                        className="btn-primary blink-edit nav-link active"
+                        href="/mycart"
+                      >
+                        {" "}
+                        Go To Cart
+                      </a>
+                    </li>
+                  </ul>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
           </div>
+
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          ></ToastContainer>
         </div>
       </>
     );
@@ -245,6 +294,7 @@ const Carousels = ({ picList }: any) => (
 
 export default compose(
   withRouter,
+  withFirebase,
   inject("itemStore"),
 
   observer

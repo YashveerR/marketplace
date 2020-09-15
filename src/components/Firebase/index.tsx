@@ -201,6 +201,67 @@ class Firebase {
     );
   }
 
+  async createTempLock(docId: any, startTime: any, endTime: any) {
+    return this.db
+      .collection("items")
+      .doc(docId)
+      .collection("tempReserve")
+      .add({
+        start: startTime,
+        end: endTime,
+      });
+  }
+
+  createRentedDate(docId: any, startTime: any, endTime: any) {
+    return this.db
+      .collection("items")
+      .doc(docId)
+      .collection("itemDates")
+      .add({ startDate: startTime, endDate: endTime });
+  }
+
+  createMyOrder(
+    docId: any,
+    itemId: any,
+    itemOrderId: any,
+    startTime: any,
+    endTime: any,
+    orderStat: any
+  ) {
+    this.db.collection("users").doc(docId).collection("myOrders").doc().set(
+      {
+        item: itemId,
+        orderId: itemOrderId,
+        start: startTime,
+        end: endTime,
+        orderStatus: orderStat,
+      },
+      { merge: true }
+    );
+  }
+
+  createOwnerOrder(
+    docId: any,
+    renterId: any,
+    orderId: any,
+    orderStatus: any,
+    item: any,
+    startT: any,
+    endT: any
+  ) {
+    this.db.collection("users").doc(docId).collection("rentedOut").doc().set(
+      {
+        renter: renterId,
+        orderNo: orderId,
+        orderStat: orderStatus,
+        itemTitle: item,
+        start: startT,
+        end: endT,
+      },
+      { merge: true }
+    );
+  }
+
   updateUserItem(
     docId: any,
     itemTitle: any,
@@ -237,6 +298,10 @@ class Firebase {
     return this.db.collection("items").get();
   }
 
+  readUserOrder(uId: any) {
+    return this.db.collection("users").doc(uId).collection("myOrders").get();
+  }
+
   doUnsubListener() {
     this.callBack();
   }
@@ -245,9 +310,9 @@ class Firebase {
     return this.db
       .collection("items")
       .doc(docId)
-      .collection("itemDates", (ref: any) =>
-        ref.where("startTime", ">=", this.dateCalc()).orderBy("startTime")
-      )
+      .collection("itemDates")
+      .where("startDate", ">=", this.dateCalc())
+      .orderBy("startDate")
       .get();
   }
 
@@ -298,12 +363,30 @@ class Firebase {
 
     await this.db.collection("items").doc(docId).delete();
   }
+
+  deleteDateLocks(itemId: any, docId: any) {
+    this.db
+      .collection("items")
+      .doc(itemId)
+      .collection("tempReserve")
+      .doc(docId)
+      .delete();
+  }
+
+  readDateLocks(docId: any) {
+    return this.db
+      .collection("items")
+      .doc(docId)
+      .collection("tempReserve")
+      .get();
+  }
+
   dateCalc() {
     var getDays = new Date().getDate();
     var getYr = new Date().getFullYear();
     var getMonth = new Date().getMonth();
     var datum = new Date(getYr, getMonth, getDays);
-
+    console.log(datum.toDateString());
     return datum;
   }
   user = (uid: any) => this.db.doc(`users/${uid}`);

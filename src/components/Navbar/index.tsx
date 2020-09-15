@@ -9,6 +9,7 @@ import SignOutActs from "../SignOut";
 import "./navbar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { withFirebase } from "../Firebase";
 
 const NavResult = ({ sessionStore, itemStore }: any) =>
   sessionStore.authUser ? <NavBarComp /> : <NavBarNoAuth />;
@@ -62,10 +63,10 @@ class NavBarsNoAuth extends React.Component<any, any> {
               <Nav.Link href={ROUTES.SIGN_IN}>Sign In</Nav.Link>
             </Nav>
             <Nav className="justify-content-end">
-              Cart
+              <div className="alignCart">Cart</div>
               <Nav.Link href="/mycart">
                 <FontAwesomeIcon className="fa-lg" icon={faShoppingCart} />
-                <div>{this.props.itemStore.itemList.length}</div>
+                {this.props.itemStore.itemList.length}
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
@@ -80,6 +81,7 @@ const CartStatus = ({ itemStore }: any) => <></>;
 const NavBarComp = compose(inject("itemStore"), observer)(NavBars);
 const NavBarNoAuth = compose(inject("itemStore"), observer)(NavBarsNoAuth);
 export default compose(
+  withFirebase,
   inject("sessionStore"),
   inject("itemStore"),
   observer

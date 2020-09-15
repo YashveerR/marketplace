@@ -98,8 +98,10 @@ class Search extends Component<any, any> {
         this.setState({ allItems: allDataList });
         filteredList = allDataList.filter((filt: any) => {
           return (
-            filt.Title.includes(fromNotifications) ||
-            filt.Desc.includes(fromNotifications)
+            filt.Title.toLowerCase().includes(
+              fromNotifications.toLowerCase()
+            ) ||
+            filt.Desc.toLowerCase().includes(fromNotifications.toLowerCase())
           );
         });
         this.setState({ filtItems: filteredList });
@@ -108,12 +110,6 @@ class Search extends Component<any, any> {
         this.setState({ showSpinner: false });
         this.fetchMoreData();
       });
-    console.log(
-      "checking props",
-      fromNotifications,
-      filteredList,
-      this.state.filtItems
-    );
 
     window.addEventListener("scroll", this.handleScroll);
   }
