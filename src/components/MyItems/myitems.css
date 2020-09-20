@@ -156,3 +156,13 @@
 .check-lbl-edit {
   margin-left: 20px;
 }
+
+.font-error {
+  font-size: 30px;
+  font-weight: 600;
+  color: white;
+  position: absolute;
+
+  top: 50%;
+  left: 20%;
+}

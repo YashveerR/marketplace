@@ -17,3 +17,4 @@ export const BOOKS = "/books";
 export const CRAFT = "/craft";
 export const VIEWITEM = "/itemview";
 export const MYITEMS = "/mycart";
+export const CATSEARCH = "/cats";

@@ -302,6 +302,10 @@ class Firebase {
     return this.db.collection("users").doc(uId).collection("myOrders").get();
   }
 
+  readCats(itemCatFilt: any) {
+    return this.db.collection("items").where("Cat", "==", itemCatFilt).get();
+  }
+
   doUnsubListener() {
     this.callBack();
   }
@@ -314,6 +318,10 @@ class Firebase {
       .where("startDate", ">=", this.dateCalc())
       .orderBy("startDate")
       .get();
+  }
+
+  readOwnerOrders(uid: any) {
+    return this.db.collection("users").doc(uid).collection("rentedOut").get();
   }
 
   doSendEmailVerification = () =>
@@ -341,10 +349,8 @@ class Firebase {
             };
 
             next(authUser);
-            console.log("after user");
           });
       } else {
-        console.log("falling back to nothingness");
         fallback();
       }
     });

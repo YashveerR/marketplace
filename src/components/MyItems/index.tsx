@@ -8,7 +8,7 @@ import { STORECATS } from "../../constants/storeCats";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-class MyItems extends Component<any, any> {
+class MyItems extends Component<{ firebase: any }, any> {
   test_prop: any;
   db: any;
   unsubscribe: any;
@@ -52,12 +52,16 @@ class MyItems extends Component<any, any> {
   }
 
   delItem(e: any) {
-    this.props.firebase.deleteUserItem(
-      this.state.docIds[e],
-      this.state.myItems[e].ImgLink0,
-      this.state.myItems[e].ImgLink1,
-      this.state.myItems[e].ImgLink2
-    );
+    try {
+      this.props.firebase.deleteUserItem(
+        this.state.docIds[e],
+        this.state.myItems[e].ImgLink0,
+        this.state.myItems[e].ImgLink1,
+        this.state.myItems[e].ImgLink2
+      );
+    } catch (exception) {
+      alert("Error in deleting user item");
+    }
   }
 
   toastmessage = (datafromchild: any) => {
@@ -76,37 +80,41 @@ class MyItems extends Component<any, any> {
     let tempIds: any[] = [];
 
     //retrieve user items from firebase
-    this.unsubscribe = this.db
-      .collection("items")
-      .where("author", "==", this.props.firebase.auth.currentUser["uid"])
-      .onSnapshot((snapshot: any) => {
-        snapshot.docChanges().forEach((change: any) => {
-          if (change.type === "added") {
-            tempArr.push(change.doc.data());
-            tempIds.push(change.doc.id);
-            this.setState({ docIds: tempIds });
-            this.setState({ myItems: tempArr });
-            this.setState({ itemsDL: true });
-          }
-          if (change.type === "modified") {
-          }
-          if (change.type === "removed") {
-            this.deleted_value = change.doc.id;
-            this.deletedDoc = change.doc.data();
+    try {
+      this.unsubscribe = this.db
+        .collection("items")
+        .where("author", "==", this.props.firebase.auth.currentUser["uid"])
+        .onSnapshot((snapshot: any) => {
+          snapshot.docChanges().forEach((change: any) => {
+            if (change.type === "added") {
+              tempArr.push(change.doc.data());
+              tempIds.push(change.doc.id);
+              this.setState({ docIds: tempIds });
+              this.setState({ myItems: tempArr });
+              this.setState({ itemsDL: true });
+            }
+            if (change.type === "modified") {
+            }
+            if (change.type === "removed") {
+              this.deleted_value = change.doc.id;
+              this.deletedDoc = change.doc.data();
 
-            tempIds = this.state.docIds.filter(
-              (id: any) => id !== this.deleted_value
-            );
-            console.log("post filter ID's", tempIds);
-            tempArr = this.state.myItems.filter(
-              (data: any) => data.Title !== this.deletedDoc.Title
-            );
-            console.log("post filter ID's", tempArr);
-            this.setState({ docIds: tempIds });
-            this.setState({ myItems: tempArr });
-          }
+              tempIds = this.state.docIds.filter(
+                (id: any) => id !== this.deleted_value
+              );
+              console.log("post filter ID's", tempIds);
+              tempArr = this.state.myItems.filter(
+                (data: any) => data.Title !== this.deletedDoc.Title
+              );
+              console.log("post filter ID's", tempArr);
+              this.setState({ docIds: tempIds });
+              this.setState({ myItems: tempArr });
+            }
+          });
         });
-      });
+    } catch (exception) {
+      alert("Error in subscribing to items");
+    }
   }
   componentWillUnmount() {
     //make sure when this component unmounts we destroy the listener
@@ -119,38 +127,43 @@ class MyItems extends Component<any, any> {
     return (
       <>
         <div className="row row-edit">
-          {this.state.itemsDL
-            ? this.state.myItems.map((data: any, index: any) => {
-                return (
-                  <div key={index} className="col-sm-3 column-edit">
-                    <div className="card ">
-                      <img
-                        src={data.ImgLink0}
-                        className="card-img-top"
-                        alt="..."
-                      ></img>
-                      <div className="card-body">
-                        <h5 className="card-title">{data.Title} </h5>
-                        <p className="card-text"></p>
-                        <button
-                          onClick={this.viewEditForm.bind(this, index)}
-                          type="button"
-                          className="btn"
-                        >
-                          Edit Item
-                        </button>
-                        <button
-                          className="btn"
-                          onClick={() => this.delItem(index)}
-                        >
-                          Delete Item
-                        </button>
-                      </div>
+          {this.state.itemsDL ? (
+            this.state.myItems.map((data: any, index: any) => {
+              return (
+                <div key={index} className="col-sm-3 column-edit">
+                  <div className="card ">
+                    <img
+                      src={data.ImgLink0}
+                      className="card-img-top"
+                      alt="..."
+                    ></img>
+                    <div className="card-body">
+                      <h5 className="card-title">{data.Title} </h5>
+                      <p className="card-text"></p>
+                      <button
+                        onClick={this.viewEditForm.bind(this, index)}
+                        type="button"
+                        className="btn"
+                      >
+                        Edit Item
+                      </button>
+                      <button
+                        className="btn"
+                        onClick={() => this.delItem(index)}
+                      >
+                        Delete Item
+                      </button>
                     </div>
                   </div>
-                );
-              })
-            : "Well thisd is awkward... Ermmmmm"}
+                </div>
+              );
+            })
+          ) : (
+            <div className="font-error">
+              {" "}
+              "Nothing to see here... How about we add some items shall we? "{" "}
+            </div>
+          )}
         </div>
         <button
           onClick={this.viewNewItemForm.bind(this)}
@@ -198,7 +211,18 @@ class MyItems extends Component<any, any> {
   }
 }
 
-class Popup extends React.Component<any, any> {
+class Popup extends React.Component<
+  {
+    firebase: any;
+    editForm: any;
+    index: any;
+    editItemId: any;
+    toastType: any;
+    toastRetval: any;
+    closePopup: any;
+  },
+  any
+> {
   imgArry: any = [];
   constructor(props: any) {
     super(props);
@@ -228,17 +252,22 @@ class Popup extends React.Component<any, any> {
       this.setState({ editing: true });
       console.log("Item we want to edit", this.props.editItemId);
       console.log("index", this.props.index);
-      this.props.firebase.readUserItem(this.props.index).then((doc: any) => {
-        console.log(doc.data().ImgLink0[0]);
-        this.setState({ itemTitle: doc.data().Title });
-        this.setState({ itemDesc: doc.data().Desc });
-        this.setState({ itemPrice: doc.data().Price });
-        this.setState({ itemCategory: doc.data().Cat });
-        this.setState({ publicItem: doc.data().Status });
-        this.setState({ img0: doc.data().ImgLink0 });
-        this.setState({ img1: doc.data().ImgLink1 });
-        this.setState({ img2: doc.data().ImgLink2 });
-      });
+
+      try {
+        this.props.firebase.readUserItem(this.props.index).then((doc: any) => {
+          console.log(doc.data().ImgLink0[0]);
+          this.setState({ itemTitle: doc.data().Title });
+          this.setState({ itemDesc: doc.data().Desc });
+          this.setState({ itemPrice: doc.data().Price });
+          this.setState({ itemCategory: doc.data().Cat });
+          this.setState({ publicItem: doc.data().Status });
+          this.setState({ img0: doc.data().ImgLink0 });
+          this.setState({ img1: doc.data().ImgLink1 });
+          this.setState({ img2: doc.data().ImgLink2 });
+        });
+      } catch (exception) {
+        alert("Error in retrieving item data");
+      }
     }
   }
   onSubmit = async (event: any) => {
@@ -248,59 +277,62 @@ class Popup extends React.Component<any, any> {
       this.state.fileTwo,
       this.state.fileThree,
     ];
-
-    Promise.all(
-      tempArr.map(async (image: any) => {
-        return await this.props.firebase.createImages(
-          image,
-          this.props.firebase.auth.currentUser["uid"],
-          this.state.itemTitle,
-          this.state.itemCategory
-        );
-      })
-    ).then(
-      (value: any) => {
-        console.log("this is supposed to be an array of 3", value);
-        if (value[0][0] === "") value[0] = this.state.img0;
-        if (value[1][0] === "") value[1] = this.state.img1;
-        if (value[2][0] === "") value[2] = this.state.img2;
-        if (this.props.editForm === "update") {
-          this.props.firebase
-            .updateUserItem(
-              this.props.index,
-              this.state.itemTitle,
-              this.state.itemDesc,
-              this.state.itemPrice,
-              this.state.itemCategory,
-              this.state.publicItem,
-              value
-            )
-            .then(() => {
-              this.props.toastRetval("Data Successfully Updated");
-              this.props.toastType(true);
-            });
-        } else {
-          this.props.firebase
-            .createUserItem(
-              this.props.firebase.auth.currentUser["uid"],
-              this.state.itemTitle,
-              this.state.itemDesc,
-              this.state.itemPrice,
-              this.state.itemCategory,
-              this.state.publicItem,
-              value
-            )
-            .then(() => {
-              this.props.toastRetval("Data Successfully Uploaded");
-              this.props.toastType(true);
-            });
+    try {
+      Promise.all(
+        tempArr.map(async (image: any) => {
+          return await this.props.firebase.createImages(
+            image,
+            this.props.firebase.auth.currentUser["uid"],
+            this.state.itemTitle,
+            this.state.itemCategory
+          );
+        })
+      ).then(
+        (value: any) => {
+          console.log("this is supposed to be an array of 3", value);
+          if (value[0][0] === "") value[0] = this.state.img0;
+          if (value[1][0] === "") value[1] = this.state.img1;
+          if (value[2][0] === "") value[2] = this.state.img2;
+          if (this.props.editForm === "update") {
+            this.props.firebase
+              .updateUserItem(
+                this.props.index,
+                this.state.itemTitle,
+                this.state.itemDesc,
+                this.state.itemPrice,
+                this.state.itemCategory,
+                this.state.publicItem,
+                value
+              )
+              .then(() => {
+                this.props.toastRetval("Data Successfully Updated");
+                this.props.toastType(true);
+              });
+          } else {
+            this.props.firebase
+              .createUserItem(
+                this.props.firebase.auth.currentUser["uid"],
+                this.state.itemTitle,
+                this.state.itemDesc,
+                this.state.itemPrice,
+                this.state.itemCategory,
+                this.state.publicItem,
+                value
+              )
+              .then(() => {
+                this.props.toastRetval("Data Successfully Uploaded");
+                this.props.toastType(true);
+              });
+          }
+        },
+        (nonValue) => {
+          this.props.toastRetval(nonValue);
+          this.props.toastType(false);
         }
-      },
-      (nonValue) => {
-        this.props.toastRetval(nonValue);
-        this.props.toastType(false);
-      }
-    );
+      );
+    } catch (exceptin) {
+      alert("Error in creating item");
+    }
 
     return this.props.closePopup(true);
   };

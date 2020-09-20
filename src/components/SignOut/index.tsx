@@ -5,7 +5,7 @@ import { inject, observer } from "mobx-react";
 import { compose } from "recompose";
 import "./signout.css";
 
-class SignOutActs extends Component<any, any> {
+class SignOutActs extends Component<{ firebase: any; itemStore: any }, any> {
   constructor(props: any) {
     super(props);
     this.handleClick = this.handleClick.bind(this);

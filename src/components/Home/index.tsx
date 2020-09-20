@@ -1,13 +1,12 @@
 import React, { Component } from "react";
-import { withRouter, Link } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import "mobx-react-lite/batchingForReactDom";
 import "./home.css";
 import NavResult from "../Navbar";
 import { inject, observer } from "mobx-react";
 import { compose } from "recompose";
 import { STORECATS } from "../../constants/storeCats";
-import * as ROUTES from "../../constants/routes";
-
+import { ToastContainer, toast } from "react-toastify";
 import gadgets from "../../assets/gadgets.jpg";
 import homeware from "../../assets/homeware.jpg";
 import tools from "../../assets/tools.jpg";
@@ -19,13 +18,15 @@ import gaming from "../../assets/gaming.jpg";
 import books from "../../assets/books.jpg";
 import crafts from "../../assets/crafts.jpg";
 
-class Home extends Component<any, any> {
+class Home extends Component<{ firebase: any; history: any }, any> {
   constructor(props: any) {
     super(props);
     this.state = {
       searchInput: "",
     };
     this.keyPressed = this.keyPressed.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.onBtnClick = this.onBtnClick.bind(this);
   }
   imgArr = [
     gadgets,
@@ -59,11 +60,31 @@ class Home extends Component<any, any> {
 
   keyPressed(event: any) {
     if (event.key === "Enter") {
+      if (!this.state.searchInput) {
+        toast.error("No Search term entered!");
+      } else {
+        this.props.history.push("/search", {
+          fromNotifications: this.state.searchInput,
+        });
+      }
+    }
+  }
+  handleClick(event: any) {
+    this.props.history.push("/cats", {
+      searchCat: event,
+    });
+  }
+
+  onBtnClick() {
+    if (!this.state.searchInput) {
+      toast.error("No Search term entered!");
+    } else {
       this.props.history.push("/search", {
         fromNotifications: this.state.searchInput,
       });
     }
   }
+
   render() {
     return (
       <>
@@ -92,17 +113,9 @@ class Home extends Component<any, any> {
                     ></input>
                   </div>
                   <div className="col-sm-2">
-                    <Link
-                      className="btn btn-info"
-                      to={{
-                        pathname: "/search",
-                        state: {
-                          fromNotifications: this.state.searchInput,
-                        },
-                      }}
-                    >
+                    <button onClick={this.onBtnClick} className="btn btn-info">
                       Search
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -122,6 +135,7 @@ class Home extends Component<any, any> {
                         className="image"
                         alt="..."
                         src={this.imgArr[i]}
+                        onClick={() => this.handleClick(this.categoriesArr[i])}
                       ></img>
                       <div className="middle">
                         <div className="text">{this.categoriesArr[i]}</div>
@@ -133,6 +147,17 @@ class Home extends Component<any, any> {
             </div>
           </div>
         </div>
+        <ToastContainer
+          position="bottom-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        ></ToastContainer>
       </>
     );
   }

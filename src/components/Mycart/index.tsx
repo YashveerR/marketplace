@@ -6,11 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
-import { withAuthorization, withAuthentication } from "../Session";
 
 const ORDERED = "ordered";
 
-class MyCart extends Component<any, any> {
+class MyCart extends Component<
+  { firebase: any; itemStore: any; sessionStore: any },
+  any
+> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -34,36 +36,44 @@ class MyCart extends Component<any, any> {
     let storeInt = newLocal;
     //TODO: complete add item in users queue
     //TODO: execute a firestore function to send an email confirmation of order etc. etc. etc.
-    this.props.itemStore.itemList.forEach((listedItems: any) => {
-      this.props.firebase
-        .createRentedDate(
-          listedItems[3],
-          new Date(listedItems[1]),
-          new Date(listedItems[2])
-        )
-        .then((invoiceId: any) => {
-          this.props.firebase.createOwnerOrder(
-            listedItems[0].author,
-            this.props.firebase.auth.currentUser["uid"],
-            invoiceId.id,
-            ORDERED,
-            listedItems[0].Title,
-            listedItems[1],
-            listedItems[2]
-          );
-          this.props.firebase.createMyOrder(
-            this.props.firebase.auth.currentUser["uid"],
+    try {
+      this.props.itemStore.itemList.forEach((listedItems: any) => {
+        this.props.firebase
+          .createRentedDate(
             listedItems[3],
-            invoiceId.id,
-            listedItems[1],
-            listedItems[2],
-            ORDERED
-          );
-        });
-    });
+            new Date(listedItems[1]),
+            new Date(listedItems[2])
+          )
+          .then((invoiceId: any) => {
+            this.props.firebase.createOwnerOrder(
+              listedItems[0].author,
+              this.props.firebase.auth.currentUser["uid"],
+              invoiceId.id,
+              ORDERED,
+              listedItems[0].Title,
+              listedItems[1],
+              listedItems[2]
+            );
+            this.props.firebase.createMyOrder(
+              this.props.firebase.auth.currentUser["uid"],
+              listedItems[3],
+              invoiceId.id,
+              listedItems[1],
+              listedItems[2],
+              ORDERED
+            );
+          });
+      });
+    } catch (exception) {
+      console.log("Error in creating order");
+    }
 
     storeInt.lockedItems.forEach((data: any) => {
-      this.props.firebase.deleteDateLocks(data[0], data[1]);
+      try {
+        this.props.firebase.deleteDateLocks(data[0], data[1]);
+      } catch (exception) {
+        alert("Hmmmm... couldn't delete temporary reservation");
+      }
     });
 
     //
@@ -107,53 +117,54 @@ class MyCart extends Component<any, any> {
       JSON.parse(window.localStorage.getItem("lockIds") || "{}")
     );
     //I think before checkout we have to have them singUp...and have valid addresses...
-    this.props.sessionStore.authUser
-      ? console.log("authorized")
-      : this.props.history.push("/signin");
-
-    this.props.itemStore.itemList.forEach((list: any) => {
-      this.props.firebase
-        .readDateLocks(list[3])
-        .then((allItems: any) => {
-          allItems.forEach((data: any) => {
-            //check the dates at the first one break and result in a conflict message
-            const serverStart = new Date(data.data()["start"]);
-            const serverEnd = new Date(data.data()["end"]);
-            if (
-              serverStart.valueOf() >= new Date(list[1]).valueOf() &&
-              serverEnd.valueOf() <= new Date(list[2]).valueOf()
-            ) {
-              conflict = true;
-              toast.error(
-                `Dates Taken for Item: ${list[0].Title} ${
-                  list[1].split("T")[0]
-                } ${list[2].split("T")[0]}`
-              );
-            }
-          });
-        })
-        .then(async () => {
-          //if we have found no locks for the same item within the date range then add a lock and book
-          if (conflict === false) {
-            await this.props.firebase
-              .createTempLock(
-                list[3],
-                new Date(list[1]).toDateString(),
-                new Date(list[2]).toDateString()
-              )
-              .then((doc: any) => {
-                lockIds.push([list[3], doc.id]);
+    try {
+      this.props.sessionStore.authUser
+        ? this.props.itemStore.itemList.forEach((list: any) => {
+            this.props.firebase
+              .readDateLocks(list[3])
+              .then((allItems: any) => {
+                allItems.forEach((data: any) => {
+                  //check the dates at the first one break and result in a conflict message
+                  const serverStart = new Date(data.data()["start"]);
+                  const serverEnd = new Date(data.data()["end"]);
+                  if (
+                    serverStart.valueOf() >= new Date(list[1]).valueOf() &&
+                    serverEnd.valueOf() <= new Date(list[2]).valueOf()
+                  ) {
+                    conflict = true;
+                    toast.error(
+                      `Dates Taken for Item: ${list[0].Title} ${
+                        list[1].split("T")[0]
+                      } ${list[2].split("T")[0]}`
+                    );
+                  }
+                });
+              })
+              .then(async () => {
+                //if we have found no locks for the same item within the date range then add a lock and book
+                if (conflict === false) {
+                  await this.props.firebase
+                    .createTempLock(
+                      list[3],
+                      new Date(list[1]).toDateString(),
+                      new Date(list[2]).toDateString()
+                    )
+                    .then((doc: any) => {
+                      lockIds.push([list[3], doc.id]);
+                    });
+                  //store to local storage in the event that they navigate from page to the payment portal, this info
+                  //will be lost, so save in session and clear upon checkout success.
+                  window.localStorage.setItem(
+                    "lockIds",
+                    JSON.stringify({ lockedItems: lockIds })
+                  );
+                }
               });
-            //store to local storage in the event that they navigate from page to the payment portal, this info
-            //will be lost, so save in session and clear upon checkout success.
-            window.localStorage.setItem(
-              "lockIds",
-              JSON.stringify({ lockedItems: lockIds })
-            );
-          }
-        });
-    });
-
+          })
+        : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
+    } catch (exception) {
+      alert("Error in the order. Admins alerted will contact you further");
+    }
     //call checkout stuff here, on success clear cart and local storage and start the communications
     //workflow....the correct way to do these would be to create nice objects instead of these
     //silly array indices which for all intensive purposes have no meaning here..... tisk tisk!!!!!
@@ -179,21 +190,25 @@ class MyCart extends Component<any, any> {
   componentDidMount() {
     this.doSum();
     //console.log("uid render", this.props.firebase.auth.currentUser["uid"]);
-    this.props.firebase.auth.onAuthStateChanged((user: any) => {
-      if (user) {
-        this.props.firebase.doReadSingleDoc(user.uid).then((_doc: any) => {
-          this.setState({ name: _doc.data().name });
-          this.setState({ lastname: _doc.data().lastname });
-          this.setState({ email: _doc.data().email });
-          this.setState({ number: _doc.data().number });
-          this.setState({ address: _doc.data().address });
-          this.setState({ suburb: _doc.data().suburb });
-          this.setState({ province: _doc.data().province });
-          this.setState({ areacode: _doc.data().areacode });
-          this.setState({ terms: _doc.data().terms });
-        });
-      }
-    });
+    try {
+      this.props.firebase.auth.onAuthStateChanged((user: any) => {
+        if (user) {
+          this.props.firebase.doReadSingleDoc(user.uid).then((_doc: any) => {
+            this.setState({ name: _doc.data().name });
+            this.setState({ lastname: _doc.data().lastname });
+            this.setState({ email: _doc.data().email });
+            this.setState({ number: _doc.data().number });
+            this.setState({ address: _doc.data().address });
+            this.setState({ suburb: _doc.data().suburb });
+            this.setState({ province: _doc.data().province });
+            this.setState({ areacode: _doc.data().areacode });
+            this.setState({ terms: _doc.data().terms });
+          });
+        }
+      });
+    } catch (exception) {
+      alert("Error in reading your address information");
+    }
   }
 
   render() {
@@ -256,12 +271,12 @@ class MyCart extends Component<any, any> {
     );
   }
 }
-const condition = (authUser: any) => !!authUser;
+//const condition = (authUser: any) => !!authUser;
 export default compose(
   inject("sessionStore"),
   withFirebase,
-  withAuthentication,
-  withAuthorization(condition),
+  //withAuthentication,
+  //withAuthorization(condition),
   inject("itemStore"),
   observer
 )(MyCart);

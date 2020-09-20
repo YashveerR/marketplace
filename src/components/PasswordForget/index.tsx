@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import "./pforget.css";
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
+import NavResult from "../Navbar";
+import { ToastContainer, toast } from "react-toastify";
 
 const PasswordForgetPage = () => (
   <div>
-    <h1>PasswordForget</h1>
     <PasswordForgetForm />
   </div>
 );
@@ -16,26 +17,37 @@ const INITIAL_STATE = {
   error: null,
 };
 
-class PasswordForgetFormBase extends Component<any, any> {
+class PasswordForgetFormBase extends Component<{ firebase: any }, any> {
   constructor(props: any) {
     super(props);
 
-    this.state = { ...INITIAL_STATE };
+    this.state = {
+      ...INITIAL_STATE,
+    };
   }
 
   onSubmit = (event: any) => {
     const { email } = this.state;
+    try {
+      if (!this.state["email"]) {
+        //error in form blank email
+        console.log("email cannot be blank!!");
+      } else {
+        this.props.firebase
+          .doPasswordReset(email)
+          .then(() => {
+            this.setState({ ...INITIAL_STATE });
+            toast.success("Reset Email Sent, Check your Inbox");
+          })
+          .catch((error: any) => {
+            this.setState({ error });
+          });
 
-    this.props.firebase
-      .doPasswordReset(email)
-      .then(() => {
-        this.setState({ ...INITIAL_STATE });
-      })
-      .catch((error: any) => {
-        this.setState({ error });
-      });
-
-    event.preventDefault();
+        event.preventDefault();
+      }
+    } catch (Exception) {
+      alert("Error in resetting password");
+    }
   };
 
   onChange = (event: any) => {
@@ -48,23 +60,64 @@ class PasswordForgetFormBase extends Component<any, any> {
     const isInvalid = email === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="email"
-          value={this.state.email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <button disabled={isInvalid} type="submit">
-          Reset My Password
-        </button>
+      <>
+        <div className="contain-div">
+          <div>
+            <NavResult />
+          </div>
+          <div className="align-centre">
+            <div className="header2">Reset Password!</div>
+            <ColoredLine />
+            <div>
+              If accounts exists, instructions will be sent to registered email
+            </div>
+            <form onSubmit={this.onSubmit}>
+              <input
+                name="email"
+                value={this.state.email}
+                onChange={this.onChange}
+                type="text"
+                placeholder="Email Address"
+                className="pforget-input"
+              />
+              <button
+                disabled={isInvalid}
+                type="submit"
+                className="btn btn-info btn-pwdf"
+              >
+                Reset My Password
+              </button>
 
-        {error && <p>{error.message}</p>}
-      </form>
+              {error && <p>{error.message}</p>}
+            </form>
+          </div>
+          <ToastContainer
+            position="bottom-center"
+            autoClose={10000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          ></ToastContainer>
+        </div>
+      </>
     );
   }
 }
+
+const ColoredLine = ({ color }: any) => (
+  <hr
+    style={{
+      color: color,
+      backgroundColor: color,
+      height: 5,
+      marginTop: 0,
+    }}
+  />
+);
 
 const PasswordForgetLink = () => (
   <p className="fontSpec">

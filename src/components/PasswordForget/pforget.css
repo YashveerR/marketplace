@@ -1,3 +1,15 @@
 .fontSpec {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.pforget-input {
+  width: 25%;
+}
+
+.btn-pwdf {
+  width: unset;
+}
+
+.align-centre {
+  text-align: center;
+}

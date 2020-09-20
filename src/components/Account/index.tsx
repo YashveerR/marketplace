@@ -11,8 +11,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 import MyItems from "../MyItems";
 import MyOrders from "../MyOrders";
+import MyRentals from "../MyRentals";
 
-class AccountPage extends Component<any, any> {
+class AccountPage extends Component<{ firebase: any }, any> {
   selectedOption: any;
   elementDisplay: any;
 
@@ -55,6 +56,9 @@ class AccountPage extends Component<any, any> {
       case 2:
         this.elementDisplay = <MyItems />;
         break;
+      case 3:
+        this.elementDisplay = <MyRentals />;
+        break;
       default:
         this.elementDisplay = <div>BROKEN</div>;
         break;
@@ -89,7 +93,7 @@ class AccountPage extends Component<any, any> {
   }
 }
 
-class AccountInfoPage extends Component<any, any> {
+class AccountInfoPage extends Component<{ firebase: any }, any> {
   constructor(props: any) {
     super(props);
 
@@ -107,37 +111,45 @@ class AccountInfoPage extends Component<any, any> {
     };
   }
   componentDidMount() {
-    console.log(
-      this.props.firebase
-        .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
-        .then((_doc: any) => {
-          this.setState({ name: _doc.data().name });
-          this.setState({ lastname: _doc.data().lastname });
-          this.setState({ email: _doc.data().email });
-          this.setState({ number: _doc.data().number });
-          this.setState({ address: _doc.data().address });
-          this.setState({ suburb: _doc.data().suburb });
-          this.setState({ province: _doc.data().province });
-          this.setState({ areacode: _doc.data().areacode });
-          this.setState({ terms: _doc.data().terms });
-        })
-    );
+    try {
+      console.log(
+        this.props.firebase
+          .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
+          .then((_doc: any) => {
+            this.setState({ name: _doc.data().name });
+            this.setState({ lastname: _doc.data().lastname });
+            this.setState({ email: _doc.data().email });
+            this.setState({ number: _doc.data().number });
+            this.setState({ address: _doc.data().address });
+            this.setState({ suburb: _doc.data().suburb });
+            this.setState({ province: _doc.data().province });
+            this.setState({ areacode: _doc.data().areacode });
+            this.setState({ terms: _doc.data().terms });
+          })
+      );
+    } catch (exception) {
+      alert("An error has occured fetching data :(");
+    }
   }
 
   onSubmit = (event: any) => {
-    event.preventDefault();
-    this.props.firebase.doUpdateUser(
-      this.props.firebase.auth.currentUser["uid"],
-      this.state.name,
-      this.state.lastname,
-      this.state.email,
-      this.state.number,
-      this.state.address,
-      this.state.suburb,
-      this.state.province,
-      this.state.areacode,
-      this.state.terms
-    );
+    try {
+      event.preventDefault();
+      this.props.firebase.doUpdateUser(
+        this.props.firebase.auth.currentUser["uid"],
+        this.state.name,
+        this.state.lastname,
+        this.state.email,
+        this.state.number,
+        this.state.address,
+        this.state.suburb,
+        this.state.province,
+        this.state.areacode,
+        this.state.terms
+      );
+    } catch (exception) {
+      alert("An error has occured when uploading data :(");
+    }
   };
   onChange = (event: any) => {
     this.setState({ [event.target.name]: event.target.value });

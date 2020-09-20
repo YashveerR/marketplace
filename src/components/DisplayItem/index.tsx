@@ -12,7 +12,10 @@ import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-class DisplayItem extends Component<any, any> {
+class DisplayItem extends Component<
+  { firebase: any; location: any; itemStore: any },
+  any
+> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -43,17 +46,20 @@ class DisplayItem extends Component<any, any> {
   componentDidMount() {
     let tempDates: Date[] = [];
     this.setState({ data: this.props.location.state.fromNotifications });
-
-    this.props.firebase
-      .readItemDates(this.props.location.state.selectedID)
-      .then((data: any) => {
-        data.forEach((items: any) => {
-          tempDates.push(items.data()["startDate"].toDate());
-          tempDates.push(items.data()["endDate"].toDate());
-          this.setState({ exclusionDates: tempDates });
-          console.log("exclusion dates ", items.data()["startDate"].toDate());
+    try {
+      this.props.firebase
+        .readItemDates(this.props.location.state.selectedID)
+        .then((data: any) => {
+          data.forEach((items: any) => {
+            tempDates.push(items.data()["startDate"].toDate());
+            tempDates.push(items.data()["endDate"].toDate());
+            this.setState({ exclusionDates: tempDates });
+            console.log("exclusion dates ", items.data()["startDate"].toDate());
+          });
         });
-      });
+    } catch (exception) {
+      alert("Error fetching from database");
+    }
   }
 
   handleChange = (date: any) => {

@@ -32,7 +32,7 @@ const SignUpPage = () => (
   </div>
 );
 //Later on implement a better interface
-class SignUpFormBase extends Component<any, any> {
+class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
   constructor(props: any) {
     super(props);
 

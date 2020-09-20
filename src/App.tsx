@@ -12,6 +12,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import * as ROUTES from "../src/constants/routes";
 import { withAuthentication } from "../src/components/Session";
 import DisplayItem from "./components/DisplayItem";
+import CategorySearch from "./components/CategorySearch";
 
 const App = () => (
   <BrowserRouter>
@@ -24,6 +25,8 @@ const App = () => (
       <Route path={ROUTES.SEARCH} component={Search} />
       <Route path={ROUTES.VIEWITEM} component={DisplayItem} />
       <Route path={ROUTES.MYITEMS} component={MyCart} />
+      <Route path={ROUTES.CATSEARCH} component={CategorySearch} />
+      <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
     </Switch>
   </BrowserRouter>
 );
