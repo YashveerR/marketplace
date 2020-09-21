@@ -25,9 +25,6 @@ class NavBars extends React.Component<any, any> {
             <Nav className="mr-auto">
               <Nav.Link href="/myitems">My Items</Nav.Link>
               <NavDropdown title="My Account" id="basic-nav-dropdown">
-                <NavDropdown.Item href="#action/3.1">
-                  Rental history
-                </NavDropdown.Item>
                 <NavDropdown.Item href={ROUTES.ACCOUNT}>
                   Account
                 </NavDropdown.Item>
@@ -59,7 +56,6 @@ class NavBarsNoAuth extends React.Component<any, any> {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
-              <Nav.Link href="/rentout">Rent Out Item?</Nav.Link>
               <Nav.Link href={ROUTES.SIGN_IN}>Sign In</Nav.Link>
             </Nav>
             <Nav className="justify-content-end">

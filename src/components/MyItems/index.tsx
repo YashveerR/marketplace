@@ -25,6 +25,7 @@ class MyItems extends Component<{ firebase: any }, any> {
       itemsDL: false,
       viewFormEdit: false,
       itemIndexToEdit: 0,
+      fetchedItems: false,
     };
 
     this.db = this.props.firebase.db;
@@ -79,7 +80,17 @@ class MyItems extends Component<{ firebase: any }, any> {
     let tempArr: any[] = [];
     let tempIds: any[] = [];
 
+    let promiseA = new Promise((resolve, reject) => {
+      let wait = setTimeout(() => {
+        clearTimeout(wait);
+        resolve("Promise A win!");
+      }, 500);
+    });
     //retrieve user items from firebase
+    promiseA.then((res: any) => {
+      this.setState({ fetchedItems: true });
+    });
+
     try {
       this.unsubscribe = this.db
         .collection("items")
@@ -126,43 +137,51 @@ class MyItems extends Component<{ firebase: any }, any> {
   render() {
     return (
       <>
-        <div className="row row-edit">
-          {this.state.itemsDL ? (
-            this.state.myItems.map((data: any, index: any) => {
-              return (
-                <div key={index} className="col-sm-3 column-edit">
-                  <div className="card ">
-                    <img
-                      src={data.ImgLink0}
-                      className="card-img-top"
-                      alt="..."
-                    ></img>
-                    <div className="card-body">
-                      <h5 className="card-title">{data.Title} </h5>
-                      <p className="card-text"></p>
-                      <button
-                        onClick={this.viewEditForm.bind(this, index)}
-                        type="button"
-                        className="btn"
-                      >
-                        Edit Item
-                      </button>
-                      <button
-                        className="btn"
-                        onClick={() => this.delItem(index)}
-                      >
-                        Delete Item
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="font-error">
+        <div>
+          {this.state.fetchedItems ? (
+            <div className="row row-edit">
               {" "}
-              "Nothing to see here... How about we add some items shall we? "{" "}
+              {this.state.itemsDL ? (
+                this.state.myItems.map((data: any, index: any) => {
+                  return (
+                    <div key={index} className="col-sm-3 column-edit">
+                      <div className="card ">
+                        <img
+                          src={data.ImgLink0}
+                          className="card-img-top"
+                          alt="..."
+                        ></img>
+                        <div className="card-body">
+                          <h5 className="card-title">{data.Title} </h5>
+                          <p className="card-text"></p>
+                          <button
+                            onClick={this.viewEditForm.bind(this, index)}
+                            type="button"
+                            className="btn"
+                          >
+                            Edit Item
+                          </button>
+                          <button
+                            className="btn"
+                            onClick={() => this.delItem(index)}
+                          >
+                            Delete Item
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="font-error">
+                  {" "}
+                  "Nothing to see here... How about we add some items shall we?
+                  "{" "}
+                </div>
+              )}
             </div>
+          ) : (
+            ""
           )}
         </div>
         <button
