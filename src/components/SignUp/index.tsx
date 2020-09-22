@@ -39,7 +39,7 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
     this.state = { ...INITIAL_STATE };
   }
   onSubmit = (event: any) => {
-    const { username, email, passwordOne, isAdmin } = this.state;
+    const { username, email, passwordOne } = this.state;
     const roles = {};
 
     this.props.firebase

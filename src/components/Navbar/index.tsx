@@ -72,7 +72,7 @@ class NavBarsNoAuth extends React.Component<any, any> {
   }
 }
 
-const CartStatus = ({ itemStore }: any) => <></>;
+//const CartStatus = ({ itemStore }: any) => <></>;
 
 const NavBarComp = compose(inject("itemStore"), observer)(NavBars);
 const NavBarNoAuth = compose(inject("itemStore"), observer)(NavBarsNoAuth);

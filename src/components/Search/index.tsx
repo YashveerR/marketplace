@@ -105,7 +105,7 @@ class Search extends Component<any, any> {
     const { fromNotifications } = searchItem;
 
     try {
-      var results = await this.props.firebase
+      await this.props.firebase
         .readAllItems()
         .then((allItems: any) => {
           //store the entire dataset locally in the event that it requires to be used
