@@ -1,0 +1,13 @@
+.txt-rentals {
+  font-size: small;
+  font-weight: 400;
+  padding: unset;
+  align-content: center;
+  padding-top: 10px;
+}
+
+.btn-rentals {
+  width: unset;
+  padding: 5px;
+  border: unset;
+}

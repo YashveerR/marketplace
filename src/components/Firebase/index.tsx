@@ -356,6 +356,15 @@ class Firebase {
     });
   }
 
+  updateOrder(userId: any, docId: any, itemStat: any) {
+    return this.db
+      .collection("users")
+      .doc(userId)
+      .collection("rentedOut")
+      .doc(docId)
+      .update({ orderStat: itemStat });
+  }
+
   async deleteUserItem(docId: any, img0: any, img1: any, img2: any) {
     //delete the images as well
     //get the image refs...
