@@ -3,6 +3,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 import "firebase/firebase-storage";
+import "firebase/firebase-functions";
 import { v4 as uuidv4 } from "uuid";
 
 import FirebaseContext, { withFirebase } from "./context";
@@ -20,6 +21,8 @@ class Firebase {
   db: any;
   auth: any;
   store: any;
+  functions: any;
+
   emailAuthProvider: typeof app.auth.EmailAuthProvider;
   fieldValue: typeof app.firestore.FieldValue;
   googleProvider: app.auth.GoogleAuthProvider;
@@ -39,6 +42,7 @@ class Firebase {
     this.auth = app.auth();
     this.db = app.firestore();
     this.store = app.storage();
+    this.functions = app.functions();
 
     this.googleProvider = new app.auth.GoogleAuthProvider();
     this.facebookProvider = new app.auth.FacebookAuthProvider();
@@ -262,6 +266,23 @@ class Firebase {
     );
   }
 
+  createChatLink(uid0: any, uid1: any, docId: any) {
+    return this.db.collection("chat").doc(docId).set({
+      Person1: uid0,
+      Person2: uid1,
+    });
+  }
+
+  updateChatMessage(docID: any, message: string, uId: any) {
+    const msg = { msg: message, sender: uId, time: new Date() };
+    return this.db
+      .collection("chat")
+      .doc(docID)
+      .update({
+        messages: this.fieldValue.arrayUnion(msg),
+      });
+  }
+
   updateUserItem(
     docId: any,
     itemTitle: any,
@@ -324,6 +345,10 @@ class Firebase {
     return this.db.collection("users").doc(uid).collection("rentedOut").get();
   }
 
+  readMsgs(docId: string) {
+    return this.db.collection("chat").doc(docId).get();
+  }
+
   doSendEmailVerification = () =>
     firebase.auth().currentUser?.sendEmailVerification({
       url: process.env.REACT_APP_CONFIRMATION_EMAIL_REDIRECT || "",
@@ -363,6 +388,31 @@ class Firebase {
       .collection("rentedOut")
       .doc(docId)
       .update({ orderStat: itemStat });
+  }
+
+  updateUserOrder(userId: any, orderId: any, itemStat: any) {
+    const ret_val = this.db
+      .collection("users")
+      .doc(userId)
+      .collection("myOrders")
+      .where("orderId", "==", orderId)
+      .get()
+      .then((doc: any) => {
+        doc.forEach((item: any) => {
+          console.log(item.id, item.data().orderStatus);
+          this.db
+            .collection("users")
+            .doc(userId)
+            .collection("myOrders")
+            .doc(item.id)
+            .update({ orderStatus: itemStat });
+        });
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+
+    console.log("ret_val", ret_val);
   }
 
   async deleteUserItem(docId: any, img0: any, img1: any, img2: any) {

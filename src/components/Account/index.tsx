@@ -12,8 +12,8 @@ import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 import MyItems from "../MyItems";
 import MyOrders from "../MyOrders";
 import MyRentals from "../MyRentals";
-
-class AccountPage extends Component<{ firebase: any }, any> {
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+class AccountPage extends Component<{ firebase: any; itemStore: any }, any> {
   selectedOption: any;
   elementDisplay: any;
 
@@ -84,6 +84,14 @@ class AccountPage extends Component<{ firebase: any }, any> {
                   </Nav.Link>
                 );
               })}
+            </Nav>
+            <Nav className="justify-content-end">
+              <div className="alignCart">Cart</div>
+
+              <Nav.Link href="/mycart">
+                <FontAwesomeIcon className="fa-lg" icon={faShoppingCart} />
+                {this.props.itemStore.itemList.length}
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
@@ -320,6 +328,7 @@ const condition = (authUser: any) => !!authUser;
 
 export default compose(
   inject("sessionStore"),
+  inject("itemStore"),
   observer,
   withEmailVerification,
   withAuthorization(condition)

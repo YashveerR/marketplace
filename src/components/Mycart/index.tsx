@@ -51,16 +51,21 @@ class MyCart extends Component<
               invoiceId.id,
               ORDERED,
               listedItems[0].Title,
-              listedItems[1],
-              listedItems[2]
+              new Date(listedItems[1]),
+              new Date(listedItems[2])
             );
             this.props.firebase.createMyOrder(
               this.props.firebase.auth.currentUser["uid"],
               listedItems[3],
               invoiceId.id,
-              listedItems[1],
-              listedItems[2],
+              new Date(listedItems[1]),
+              new Date(listedItems[2]),
               ORDERED
+            );
+            this.props.firebase.createChatLink(
+              listedItems[0].author,
+              this.props.firebase.auth.currentUser["uid"],
+              invoiceId.id
             );
           });
       });
@@ -75,6 +80,9 @@ class MyCart extends Component<
         alert("Hmmmm... couldn't delete temporary reservation");
       }
     });
+
+    try {
+    } catch (exception) {}
 
     //
     this.removeLocalStorage();

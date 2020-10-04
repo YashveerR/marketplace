@@ -4,14 +4,27 @@ import { compose } from "recompose";
 import "./myorders.css";
 import { withFirebase } from "../Firebase";
 import { v4 as uuidv4 } from "uuid";
+import Chat from "../Chat";
 
 class MyOrders extends React.Component<{ firebase: any }, any> {
   constructor(props: any) {
     super(props);
     this.state = {
       items: [],
+      showChat: false,
+      chatOrderId: "",
     };
   }
+
+  viewNewItemForm() {
+    this.setState({
+      showChat: !this.state.showChat,
+    });
+  }
+
+  showModalChild = (datafromchild: any) => {
+    this.setState({ childActivate: !datafromchild });
+  };
 
   componentDidMount() {
     var list: any[] = [];
@@ -77,9 +90,31 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
                     {" "}
                     {data.item}
                   </div>
+                  <div key={uuidv4()} className="col-md-2 mb-2">
+                    <button
+                      className="btn btn-light msg-btn"
+                      onClick={() =>
+                        this.setState({
+                          showChat: true,
+                          chatOrderId: data.orderId,
+                        })
+                      }
+                    >
+                      Message Owner
+                    </button>
+                  </div>
                 </div>
               );
             })}
+          </div>
+          <div>
+            {this.state.showChat ? (
+              <Chat
+                closePopUp={this.viewNewItemForm.bind(this)}
+                show={this.state.showChat}
+                chatId={this.state.chatOrderId}
+              />
+            ) : null}
           </div>
         </div>
       </>
