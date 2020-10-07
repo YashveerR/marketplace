@@ -13,6 +13,7 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
       items: [],
       showChat: false,
       chatOrderId: "",
+      itemId: "",
     };
   }
 
@@ -97,6 +98,7 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
                         this.setState({
                           showChat: true,
                           chatOrderId: data.orderId,
+                          itemId: data.item,
                         })
                       }
                     >
@@ -113,6 +115,7 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
                 closePopUp={this.viewNewItemForm.bind(this)}
                 show={this.state.showChat}
                 chatId={this.state.chatOrderId}
+                itemId={this.state.itemId}
               />
             ) : null}
           </div>

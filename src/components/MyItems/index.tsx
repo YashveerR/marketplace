@@ -96,6 +96,7 @@ class MyItems extends Component<{ firebase: any }, any> {
         .collection("items")
         .where("author", "==", this.props.firebase.auth.currentUser["uid"])
         .onSnapshot((snapshot: any) => {
+          console.log("snapshots too", snapshot);
           snapshot.docChanges().forEach((change: any) => {
             if (change.type === "added") {
               tempArr.push(change.doc.data());

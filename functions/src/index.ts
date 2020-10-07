@@ -73,6 +73,46 @@ exports.sendOrderStatus = functions.https.onCall((data, context) => {
       return;
     });
 
-  console.log("What the FUCK IS HAPPENING!!!!!!!");
+  console.log(docRef);
+});
+
+exports.sendNewChatAlert = functions.https.onCall((data) => {
+  let recipientEmail = "";
+  const dataToSend = JSON.parse(data.text);
+
+  const docRef = db
+    .collection("users")
+    .doc(dataToSend.recipientId)
+    .get()
+    .then((doc: any) => {
+      recipientEmail = doc.data().email;
+      sendGridClient.setApiKey(functions.config().sendgrid.key);
+      const sendGridTemplateId = "d-a39dac3cce63410782327193a1aa8545";
+      const senderEmail = "rentathing-noreply@rentathing.com";
+
+      if (!recipientEmail || !dataToSend.recipientOrderNo) {
+        console.error(
+          new Error(
+            "Missing emailAddress or order number on user document. Aborting."
+          )
+        );
+        return;
+      }
+      const mailData = {
+        to: recipientEmail,
+        from: senderEmail,
+        templateId: sendGridTemplateId,
+
+        dynamic_template_data: {
+          orderNo: dataToSend.recipientOrderNo,
+          itemName: dataToSend.itemName,
+        },
+      };
+      return sendGridClient.send(mailData);
+    })
+    .catch(() => {
+      console.error(new Error("Error reading user Id for Email"));
+      return;
+    });
   console.log(docRef);
 });

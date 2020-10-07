@@ -9,3 +9,42 @@
 .cht-btn {
   padding: 9px;
 }
+
+.bubble-contain {
+  width: 100%;
+  display: flex;
+}
+
+.bubble {
+  border: 0.5px solid black;
+  border-radius: 10px;
+  margin: 5px;
+  padding: 10px;
+  display: inline-block;
+}
+.right {
+  justify-content: flex-end !important;
+  display: flex;
+}
+.left {
+  justify-content: flex-start !important;
+  display: flex;
+}
+
+.right-color {
+  background-color: turquoise;
+}
+.left-color {
+  background-color: tomato;
+}
+.chat-contain {
+  display: flex;
+  height: 100%;
+  flex-direction: column-reverse;
+}
+
+.overflow-auto {
+  width: 100%;
+  height: 400px;
+  overflow: scroll;
+}

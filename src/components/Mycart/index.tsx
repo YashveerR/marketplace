@@ -171,7 +171,7 @@ class MyCart extends Component<
           })
         : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
     } catch (exception) {
-      alert("Error in the order. Admins alerted will contact you further");
+      alert("Error in the order.");
     }
     //call checkout stuff here, on success clear cart and local storage and start the communications
     //workflow....the correct way to do these would be to create nice objects instead of these
