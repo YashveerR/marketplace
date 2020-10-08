@@ -88,7 +88,16 @@ exports.sendNewChatAlert = functions.https.onCall((data) => {
       recipientEmail = doc.data().email;
       sendGridClient.setApiKey(functions.config().sendgrid.key);
       const sendGridTemplateId = "d-a39dac3cce63410782327193a1aa8545";
-      const senderEmail = "rentathing-noreply@rentathing.com";
+      const senderEmail = "codenameyash@gmail.com";
+
+      console.log(
+        "READY TO SEND: ",
+        recipientEmail,
+        senderEmail,
+        sendGridTemplateId,
+        dataToSend.recipientOrderNo,
+        dataToSend.itemName
+      );
 
       if (!recipientEmail || !dataToSend.recipientOrderNo) {
         console.error(
@@ -98,20 +107,22 @@ exports.sendNewChatAlert = functions.https.onCall((data) => {
         );
         return;
       }
+
       const mailData = {
         to: recipientEmail,
         from: senderEmail,
         templateId: sendGridTemplateId,
 
         dynamic_template_data: {
-          orderNo: dataToSend.recipientOrderNo,
-          itemName: dataToSend.itemName,
+          user: "Yash",
+          orderId: dataToSend.recipientOrderNo,
+          item: dataToSend.itemName,
         },
       };
       return sendGridClient.send(mailData);
     })
-    .catch(() => {
-      console.error(new Error("Error reading user Id for Email"));
+    .catch((error: any) => {
+      console.error(new Error(error));
       return;
     });
   console.log(docRef);

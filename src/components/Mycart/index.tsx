@@ -52,7 +52,8 @@ class MyCart extends Component<
               ORDERED,
               listedItems[0].Title,
               new Date(listedItems[1]),
-              new Date(listedItems[2])
+              new Date(listedItems[2]),
+              listedItems[3]
             );
             this.props.firebase.createMyOrder(
               this.props.firebase.auth.currentUser["uid"],

@@ -30,11 +30,8 @@ class AccountPage extends Component<{ firebase: any; itemStore: any }, any> {
   }
 
   handleClick(index: any) {
-    console.log("index selected is:", index);
     this.selectedOption = index;
-    console.log("index selected is:", this.selectedOption);
     this.switchView();
-    console.log("auth user check", this.props.firebase.auth.currentUser["uid"]);
   }
 
   switchView() {

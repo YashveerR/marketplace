@@ -5,6 +5,7 @@ import { withFirebase } from "../Firebase";
 import { v4 as uuidv4 } from "uuid";
 import "./myrentals.css";
 import { ToastContainer, toast } from "react-toastify";
+import Chat from "../Chat";
 
 class MyRentals extends React.Component<{ firebase: any }, any> {
   //TODO: going to need to ONLY allow a forward movement 1 place at a time!
@@ -26,10 +27,20 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
       orderStatSel: [],
       sliceIdx_0: [],
       sliceIdx_1: [],
+      btnEnable: [],
+      showChat: false,
+      chatOrderId: "",
+      itemId: "",
     };
     this.dateString = this.dateString.bind(this);
     this.orderChange = this.orderChange.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
+  }
+
+  viewNewItemForm() {
+    this.setState({
+      showChat: !this.state.showChat,
+    });
   }
 
   updateOrder(index: number) {
@@ -89,13 +100,15 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
 
   orderChange = (event: any) => {
     var temp = [...this.state.orderStatSel];
+    var status = [...this.state.btnEnable];
 
     const index = parseInt(event.target.name);
 
     temp[index] = event.target.value;
+    status[index] = true;
 
     console.log(temp, event);
-    this.setState({ orderStatSel: temp });
+    this.setState({ orderStatSel: temp, btnEnable: status });
     console.log(this.state.orderStatSel);
   };
 
@@ -121,6 +134,7 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
     var list: any[] = [];
     var oStats: any[] = [];
     var findItem: any[] = [];
+    var btnStatus: boolean[] = [];
 
     try {
       this.props.firebase.auth.onAuthStateChanged((user: any) => {
@@ -130,11 +144,13 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
             .then((doc: any) => {
               doc.forEach((item: any) => {
                 list.push([item.id, item.data()]);
+                btnStatus.push(false);
               });
             })
             .then(() => {
               this.setState({
                 ordersList: this.mapOrder(list, this.itemOrder, "orderStat"),
+                btnEnable: btnStatus,
               });
               this.state.ordersList.forEach((element: any, index: any) => {
                 oStats.push(element[1].orderStat);
@@ -201,12 +217,24 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
                     <button
                       onClick={() => this.updateOrder(index)}
                       className="btn btn-secondary btn-rentals"
+                      disabled={
+                        this.state.btnEnable[index] === false ? true : false
+                      }
                     >
                       Update order status
                     </button>
                   </div>
                   <div key={uuidv4()} className="col-md-2 mb-2">
-                    <button className="btn btn-secondary btn-rentals">
+                    <button
+                      className="btn btn-secondary btn-rentals"
+                      onClick={() =>
+                        this.setState({
+                          showChat: true,
+                          chatOrderId: data[1].orderNo,
+                          itemId: data[1].itemId,
+                        })
+                      }
+                    >
                       Contact renter
                     </button>
                   </div>
@@ -214,6 +242,16 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
               </div>
             );
           })}
+          <div>
+            {this.state.showChat ? (
+              <Chat
+                closePopUp={this.viewNewItemForm.bind(this)}
+                show={this.state.showChat}
+                chatId={this.state.chatOrderId}
+                itemId={this.state.itemId}
+              />
+            ) : null}
+          </div>
         </div>
         <ToastContainer
           position="top-center"

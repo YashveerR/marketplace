@@ -28,6 +28,7 @@ class Chat extends React.Component<
       userIdLocal: "",
       dataDl: false,
       itemTitle: "",
+      newToSend: false,
     };
 
     this.db = this.props.firebase.db;
@@ -35,24 +36,12 @@ class Chat extends React.Component<
     this.handleExit = this.handleExit.bind(this);
   }
 
+  onExit = () => {
+    console.log("trying yo use exit");
+  };
+
   handleExit() {
-    //call firestore function here to alert user of new messages
-    var sendNotifications = this.props.firebase.functions.httpscallable(
-      "sendNewChatAlert"
-    );
-    sendNotifications({
-      text: JSON.stringify({
-        recipientOrderNo: this.props.chatId,
-        recipientId:
-          this.state.userIdLocal === this.state.msgStack.Person1
-            ? this.state.msgStack.Person2
-            : this.state.msgStack.Person1,
-        itemName: this.state.itemTitle,
-      }),
-      context: "Nothing to see here",
-    }).then(() => {
-      //there is no return value for meow....
-    });
+    console.log("Calling the exit process meow");
   }
   sendMessage() {
     try {
@@ -67,6 +56,7 @@ class Chat extends React.Component<
               )
               .then(() => {
                 this.setState({ msgbox: "" }); //just reset the message box on transmission
+                this.setState({ newToSend: true });
               })
               .catch(() => {
                 //we have an error here.
@@ -107,6 +97,32 @@ class Chat extends React.Component<
   }
 
   componentWillUnmount() {
+    console.log("unsubscribing, prevent them leaks!");
+    if (this.state.newToSend) {
+      //call firestore function here to alert user of new messages
+      var sendNotifications = this.props.firebase.functions.httpsCallable(
+        "sendNewChatAlert"
+      );
+      console.log(
+        "cgecking for null pasramsmkjsd",
+        this.props.chatId,
+        this.state.itemTitle,
+        this.state.userIdLocal === this.state.msgStack.Person1
+          ? this.state.msgStack.Person2
+          : this.state.msgStack.Person1
+      );
+      sendNotifications({
+        text: JSON.stringify({
+          recipientOrderNo: this.props.chatId,
+          recipientId:
+            this.state.userIdLocal === this.state.msgStack.Person1
+              ? this.state.msgStack.Person2
+              : this.state.msgStack.Person1,
+          itemName: this.state.itemTitle,
+        }),
+        context: "Nothing to see here",
+      }).then(() => {});
+    }
     this.unsubscribe();
   }
 
@@ -121,7 +137,7 @@ class Chat extends React.Component<
           animation={false}
           onHide={this.props.closePopUp}
           dialogClassName="modal-custom"
-          onExiting={this.handleExit}
+          onExit={this.onExit}
         >
           <Modal.Header closeButton>
             <Modal.Title>Order {this.props.chatId} Chat</Modal.Title>

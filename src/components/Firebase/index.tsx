@@ -251,7 +251,8 @@ class Firebase {
     orderStatus: any,
     item: any,
     startT: any,
-    endT: any
+    endT: any,
+    itemId: any
   ) {
     this.db.collection("users").doc(docId).collection("rentedOut").doc().set(
       {
@@ -261,6 +262,7 @@ class Firebase {
         itemTitle: item,
         start: startT,
         end: endT,
+        itemId: itemId,
       },
       { merge: true }
     );
