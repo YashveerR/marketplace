@@ -10,37 +10,64 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
+import Modal from "react-bootstrap/Modal";
 
-const SignInPage = () => (
-  <div>
-    <div className="containers">
-      <div className="row row-remove-flex">
-        <h2 className="h2-style">Login with Social Media or Manually</h2>
-      </div>
-      <div className="vl">
-        <span className="vl-innertext">or</span>
-      </div>
-      <div className="col">
-        <SignInFacebook />
-        <SignInTwitter />
-        <SignInGoogle />
-      </div>
-      <div className="col">
-        <div className="hide-md-lg">
-          <p>Or sign in manually:</p>
-        </div>
-        <SignInForm />
-      </div>
+class SignInPage extends React.Component<{ closePopUp: any; show: boolean }> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      userId: "",
+    };
+  }
 
-      <div className="col">
-        <SignUpLink />
+  handlExitPressed() {}
+
+  render() {
+    return (
+      <div>
+        <Modal
+          show={this.props.show}
+          size="lg"
+          backdrop="static"
+          keyboard={false}
+          animation={false}
+          onHide={this.props.closePopUp}
+          dialogClassName="modal-custom"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Sign In</Modal.Title>
+          </Modal.Header>
+          <div className="containers">
+            <div className="row row-remove-flex">
+              <h2 className="h2-style">Login with Social Media or Manually</h2>
+            </div>
+            <div className="vl">
+              <span className="vl-innertext">or</span>
+            </div>
+            <div className="col">
+              <SignInFacebook />
+              <SignInTwitter />
+              <SignInGoogle />
+            </div>
+            <div className="col">
+              <div className="hide-md-lg">
+                <p>Or sign in manually:</p>
+              </div>
+              <SignInForm />
+            </div>
+
+            <div className="col">
+              <SignUpLink />
+            </div>
+            <div className="col">
+              <PasswordForgetLink />
+            </div>
+          </div>
+        </Modal>
       </div>
-      <div className="col">
-        <PasswordForgetLink />
-      </div>
-    </div>
-  </div>
-);
+    );
+  }
+}
 
 const INITIAL_STATE = {
   email: "",
@@ -139,7 +166,7 @@ class SignInGoogleBase extends Component<any, any> {
         );
       })
       .then(() => {
-        this.setState({ error: null });
+        //this.setState({ error: null });
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {
@@ -192,7 +219,7 @@ class SignInFacebookBase extends Component<any, any> {
         );
       })
       .then(() => {
-        this.setState({ error: null });
+        //this.setState({ error: null });
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {
@@ -245,7 +272,7 @@ class SignInTwitterBase extends Component<any, any> {
         );
       })
       .then(() => {
-        this.setState({ error: null });
+        //this.setState({ error: null });
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {

@@ -5,7 +5,10 @@ import { inject, observer } from "mobx-react";
 import { compose } from "recompose";
 import "./signout.css";
 
-class SignOutActs extends Component<{ firebase: any; itemStore: any }, any> {
+class SignOutActs extends Component<
+  { firebase: any; itemStore: any; history: any },
+  any
+> {
   constructor(props: any) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
@@ -19,7 +22,7 @@ class SignOutActs extends Component<{ firebase: any; itemStore: any }, any> {
   render() {
     return (
       <>
-        <NavDropdown.Item onClick={this.handleClick} eventKey="info">
+        <NavDropdown.Item onClick={this.handleClick} href="/" eventKey="info">
           Logout
         </NavDropdown.Item>
       </>
@@ -29,6 +32,7 @@ class SignOutActs extends Component<{ firebase: any; itemStore: any }, any> {
 
 export default compose(
   withFirebase,
+  inject("sessionStore"),
   inject("itemStore"),
   observer
 )(SignOutActs);
