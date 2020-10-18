@@ -6,9 +6,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
-
+import "./mycart.css";
 const ORDERED = "ordered";
 
+const PROVINCES = [
+  "Select a Province",
+  "Gauteng",
+  "Kwazulu Natal",
+  "Northern Cape",
+  "Western Cape",
+  "Eastern Cape",
+  "Mpumalanga",
+  "Limpopo",
+  "North West",
+  "Free State",
+];
 class MyCart extends Component<
   { firebase: any; itemStore: any; sessionStore: any },
   any
@@ -20,14 +32,17 @@ class MyCart extends Component<
       itemsTot: 0,
       tempLockId: "",
       userDetails: false,
+      classState: ["section is-active", "section", "section"],
+      classStatusState: ["step active", "step", "step", "step"],
     };
     this.handleClick = this.handleClick.bind(this);
     this.handleDates = this.handleDates.bind(this);
     this.doSum = this.doSum.bind(this);
     this.checkOutClick = this.checkOutClick.bind(this);
     this.dateString = this.dateString.bind(this);
-
+    this.formBtnClick = this.formBtnClick.bind(this);
     this.simulateCO = this.simulateCO.bind(this);
+    this.formBtnBackClick = this.formBtnBackClick.bind(this);
   }
 
   simulateCO() {
@@ -104,7 +119,6 @@ class MyCart extends Component<
   doSum() {
     var tempTotal = 0;
     this.props.itemStore.itemList.forEach((data: any) => {
-      console.log(new Date(data[2]), data[1]);
       tempTotal += parseInt(data[0].Price) * this.handleDates(data[2], data[1]);
     });
     console.log(tempTotal);
@@ -115,6 +129,65 @@ class MyCart extends Component<
   handleClick(event: any) {
     this.props.itemStore.removeItem(event);
     this.doSum();
+  }
+
+  formBtnClick(event: any) {
+    //so we got here because we need to advance the form
+    const eventSrc = parseInt(event.target.name);
+    var temp = [...this.state.classState];
+    var temp2 = [...this.state.classStatusState];
+
+    switch (eventSrc) {
+      case 0:
+        temp[eventSrc] = "section";
+        temp[eventSrc + 1] = "section is-active";
+
+        temp2[eventSrc + 1] = "step active";
+        break;
+      case 1:
+        temp[eventSrc] = "section";
+        temp[eventSrc + 1] = "section is-active";
+        temp2[eventSrc + 1] = "step active";
+        break;
+      case 2:
+        temp[eventSrc] = "section";
+        temp[eventSrc + 1] = "section is-active";
+        temp2[eventSrc + 1] = "step active";
+        break;
+      case 3: //here is the actual payment stuff!!!! add the API here
+        break;
+      default:
+        break;
+    }
+    this.setState({ classState: temp });
+    this.setState({ classStatusState: temp2 });
+  }
+
+  formBtnBackClick(event: any) {
+    const eventSrc = parseInt(event.target.name);
+    var temp = [...this.state.classState];
+    var temp2 = [...this.state.classStatusState];
+    switch (eventSrc) {
+      case 0:
+        //do nothing for this one , or find a way to not show the button at all on 0
+        break;
+      case 1:
+        temp[eventSrc] = "section";
+        temp[eventSrc - 1] = "section is-active";
+        temp2[eventSrc] = "step";
+        break;
+      case 2:
+        temp[eventSrc] = "section";
+        temp[eventSrc - 1] = "section is-active";
+        temp2[eventSrc] = "step";
+        break;
+      case 3: //here is the actual payment stuff!!!! add the API here
+        break;
+      default:
+        break;
+    }
+    this.setState({ classState: temp });
+    this.setState({ classStatusState: temp2 });
   }
 
   async checkOutClick() {
@@ -220,6 +293,10 @@ class MyCart extends Component<
     }
   }
 
+  onSubmit = (event: any) => {
+    event.preventDefault();
+  };
+
   render() {
     return (
       <>
@@ -227,8 +304,139 @@ class MyCart extends Component<
           <div>
             <NavResult />
           </div>
-          <div className="row srwedit">
-            <div className="col-md-8 mb-8 text class">
+          <div className="row row-margin">
+            <div className="col-md-7 mb-7 ">
+              <div className="row ">
+                <div className="col-md-12 mb-12 cart-container">
+                  <div className="prog">
+                    <div className={this.state.classStatusState[0]}></div>
+                    <div className={this.state.classStatusState[1]}></div>
+                    <div className={this.state.classStatusState[2]}></div>
+                    <div className={this.state.classStatusState[3]}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <form
+                  className="form-wrapper frm-wrap-edit"
+                  onSubmit={this.onSubmit}
+                >
+                  <fieldset className={this.state.classState[0]}>
+                    <h3>Billing Information</h3>
+                    <div className="row">
+                      <div className="col-md-4 mb-4">
+                        <input
+                          type="text"
+                          id="userName"
+                          placeholder="First Name"
+                        ></input>
+                        <input
+                          type="text"
+                          id="email"
+                          placeholder="lukeskywalker@etc.com"
+                        ></input>
+                      </div>
+                      <div className="col-md-4 mb-4">
+                        <input
+                          type="text"
+                          id="lastName"
+                          placeholder="Last Name"
+                        ></input>
+                        <input
+                          type="text"
+                          id="contact"
+                          placeholder="0831234567"
+                        ></input>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-8 mb-8">
+                        <input
+                          type="text"
+                          id="addressLine1"
+                          placeholder="Your Address Here"
+                        ></input>
+                        <input
+                          type="text"
+                          id="addressLine2"
+                          placeholder=""
+                        ></input>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-4 mb-4">
+                        <select
+                          className="custom-select"
+                          id="Province"
+                          placeholder="Your Address Here"
+                        >
+                          {PROVINCES.map((data: string, index: number) => {
+                            return <option key={index}> {data}</option>;
+                          })}
+                        </select>
+                        <input
+                          type="text"
+                          id="Suburb"
+                          placeholder="Your Suburb/Town"
+                        ></input>
+                      </div>
+                      <div className="col-md-4 mb-4">
+                        <input
+                          type="text"
+                          id="city"
+                          placeholder="Your City/Suburb"
+                        ></input>
+                        <input
+                          type="text"
+                          id="postalCode"
+                          placeholder="2413"
+                        ></input>
+                      </div>
+                    </div>
+
+                    <button
+                      className="button"
+                      name="0"
+                      onClick={this.formBtnClick}
+                    >
+                      Next
+                    </button>
+                  </fieldset>
+                  <fieldset className={this.state.classState[1]}>
+                    {" "}
+                    <h3>Account Type</h3>
+                    <button
+                      className="button"
+                      name="1"
+                      onClick={this.formBtnClick}
+                    >
+                      Next
+                    </button>
+                    <button
+                      className="button-back"
+                      name="1"
+                      onClick={this.formBtnBackClick}
+                    >
+                      Back
+                    </button>
+                  </fieldset>
+                  <fieldset className={this.state.classState[2]}>
+                    <h3>Choose a Password</h3>
+                    <div className="button">Nothing Next...</div>
+                    <button
+                      className="button-back"
+                      name="2"
+                      onClick={this.formBtnBackClick}
+                    >
+                      Back
+                    </button>
+                  </fieldset>
+                </form>
+              </div>
+            </div>
+            <div className="col-md-1 mb-1"></div>
+            <div className="col-md-4 mb-4 cart-container">
+              This is for the Price stuff
               {this.props.itemStore.itemList.map((data: any, index: number) => {
                 return (
                   <div key={index} className="row srwedit">
@@ -246,10 +454,7 @@ class MyCart extends Component<
                   </div>
                 );
               })}
-            </div>
-            <div className="col-md-4 mb-4 text class">
-              This is for the Price stuff
-              <div>Total: R {this.state.itemsTot}</div>
+              <div>Total: R {this.props.itemStore.basketTotal}</div>
               <div>
                 <button onClick={this.checkOutClick}>
                   <FontAwesomeIcon icon={faCreditCard} />

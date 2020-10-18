@@ -10,60 +10,81 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
-import Modal from "react-bootstrap/Modal";
 
 class SignInPage extends React.Component<{ closePopUp: any; show: boolean }> {
+  element: any;
   constructor(props: any) {
     super(props);
     this.state = {
       userId: "",
+      closeModal: false,
     };
+    this.element = React.createRef();
   }
 
   handlExitPressed() {}
 
   render() {
     return (
-      <div>
-        <Modal
-          show={this.props.show}
-          size="lg"
-          backdrop="static"
-          keyboard={false}
-          animation={false}
-          onHide={this.props.closePopUp}
-          dialogClassName="modal-custom"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Sign In</Modal.Title>
-          </Modal.Header>
-          <div className="containers">
-            <div className="row row-remove-flex">
-              <h2 className="h2-style">Login with Social Media or Manually</h2>
+      <div
+        className="modal fade preview-modal"
+        id="loginModalLong"
+        tabIndex={-1}
+        role="dialog"
+        aria-labelledby="exampleModalLongTitle"
+        aria-hidden="true"
+        ref={this.element}
+        data-backdrop=""
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="exampleModalLongTitle">
+                Sign in
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                {" "}
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
-            <div className="vl">
-              <span className="vl-innertext">or</span>
-            </div>
-            <div className="col">
-              <SignInFacebook />
-              <SignInTwitter />
-              <SignInGoogle />
-            </div>
-            <div className="col">
-              <div className="hide-md-lg">
-                <p>Or sign in manually:</p>
-              </div>
-              <SignInForm />
-            </div>
+            <div className="modal-body">
+              <div className="containers">
+                <div className="row row-remove-flex">
+                  <h2 className="h2-style">
+                    Login with Social Media or Manually
+                  </h2>
+                </div>
+                <div className="vl">
+                  <span className="vl-innertext">or</span>
+                </div>
+                <div className="col">
+                  <SignInFacebook />
+                  <SignInTwitter />
+                  <SignInGoogle />
+                </div>
+                <div className="col">
+                  <div className="hide-md-lg">
+                    <p>Or sign in manually:</p>
+                  </div>
+                  <SignInForm />
+                </div>
 
-            <div className="col">
-              <SignUpLink />
+                <div className="col">
+                  <SignUpLink />
+                </div>
+                <div className="col">
+                  <PasswordForgetLink />
+                </div>
+              </div>
             </div>
-            <div className="col">
-              <PasswordForgetLink />
-            </div>
+            <div className="modal-footer"></div>
           </div>
-        </Modal>
+        </div>
       </div>
     );
   }
@@ -156,7 +177,7 @@ class SignInGoogleBase extends Component<any, any> {
       .doSignInWithGoogle()
       .then((socialAuthUser: any) => {
         // Create a user in your Firebase Realtime Database too
-        return this.props.firebase.user(socialAuthUser.user.uid).set(
+        this.props.firebase.user(socialAuthUser.user.uid).set(
           {
             username: socialAuthUser.user.displayName,
             email: socialAuthUser.user.email,
@@ -166,8 +187,8 @@ class SignInGoogleBase extends Component<any, any> {
         );
       })
       .then(() => {
-        //this.setState({ error: null });
-        this.props.history.push(ROUTES.HOME);
+        this.setState({ error: null });
+        //this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {
         if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
@@ -219,7 +240,7 @@ class SignInFacebookBase extends Component<any, any> {
         );
       })
       .then(() => {
-        //this.setState({ error: null });
+        this.setState({ error: null });
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {
@@ -272,7 +293,7 @@ class SignInTwitterBase extends Component<any, any> {
         );
       })
       .then(() => {
-        //this.setState({ error: null });
+        this.setState({ error: null });
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error: any) => {

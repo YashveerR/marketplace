@@ -5,7 +5,7 @@ configure({ enforceActions: "always" });
 class ItemStore {
   @observable itemList: any[] = [];
   @observable listError: any = "";
-
+  @observable basketTotal: number = 0;
   rootStore: any;
 
   constructor(rootStore: any) {
@@ -20,7 +20,6 @@ class ItemStore {
     endDate: Date,
     dbID: any
   ) => {
-    console.log(startDate, endDate);
     //Check if an item with the same title is
     let itemCheck = this.itemList.find((item) => {
       return (
@@ -57,18 +56,32 @@ class ItemStore {
     window.localStorage.removeItem(ItemStore.name);
 
     this.itemList.length = 0; //empty the array
+    this.basketTotal = 0;
   };
 
   @action removeItem = (index: number) => {
     this.itemList.splice(index, 1);
+    this.total();
+  };
+
+  private total = () => {
+    this.itemList.forEach((data: any) => {
+      this.basketTotal +=
+        parseInt(data[0].Price) *
+        (Math.abs(new Date(data[2]).valueOf() - new Date(data[1]).valueOf()) /
+          86400000 +
+          1);
+    });
   };
 
   @action
-  private load = () =>
+  private load = () => {
     Object.assign(
       this,
       JSON.parse(window.localStorage.getItem(ItemStore.name) || "{}")
     );
+    this.total();
+  };
 }
 
 export default ItemStore;

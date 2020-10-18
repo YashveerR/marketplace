@@ -8,10 +8,11 @@ import { compose } from "recompose";
 import SignOutActs from "../SignOut";
 import "./navbar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { withFirebase } from "../Firebase";
 import SignInPage from "../SignIn";
-import Modal from "react-bootstrap/Modal";
+import { v4 as uuidv4 } from "uuid";
+import { ColoredLine } from "../Search";
 
 const NavResult = ({ sessionStore, itemStore }: any) =>
   sessionStore.authUser ? <NavBarComp /> : <NavBarNoAuth />;
@@ -116,13 +117,21 @@ class NavBarsNoAuth extends React.Component<
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
-              <Nav.Link onClick={() => this.setState({ showSignIn: true })}>
+              <Nav.Link
+                onClick={() => this.setState({ showSignIn: true })}
+                data-toggle="modal"
+                data-target="#loginModalLong"
+              >
                 Sign In
               </Nav.Link>
             </Nav>
             <Nav className="justify-content-end">
               <div className="alignCart">Cart</div>
-              <Nav.Link onClick={() => this.setState({ showCartView: true })}>
+              <Nav.Link
+                onClick={() => this.setState({ showCartView: true })}
+                data-toggle="modal"
+                data-target="#exampleModalLong"
+              >
                 <FontAwesomeIcon className="fa-lg" icon={faShoppingCart} />
                 {this.props.itemStore.itemList.length}
               </Nav.Link>
@@ -130,12 +139,10 @@ class NavBarsNoAuth extends React.Component<
           </Navbar.Collapse>
         </Navbar>
         <div>
-          {this.state.showSignIn ? (
-            <SignInPage
-              closePopUp={this.viewNewItemForm.bind(this)}
-              show={this.state.showSignIn}
-            />
-          ) : null}
+          <SignInPage
+            closePopUp={this.viewNewItemForm.bind(this)}
+            show={this.state.showSignIn}
+          />
         </div>
         <div>
           <CartSideBar
@@ -152,20 +159,25 @@ class NavBarsNoAuth extends React.Component<
 }
 
 //const CartStatus = ({ itemStore }: any) => <></>;
-class CartSideBar extends React.Component<{
-  closePopUp: any;
-  show: boolean;
-  firebase: any;
-  itemStore: any;
-  sessionStore: any;
-}> {
+class CartSideBar extends React.Component<
+  {
+    closePopUp: any;
+    show: boolean;
+    firebase: any;
+    itemStore: any;
+    sessionStore: any;
+  },
+  any
+> {
   constructor(props: any) {
     super(props);
     this.state = {
       showSideBar: false,
     };
+    this.handleDelete = this.handleDelete.bind(this);
     this.handleDates = this.handleDates.bind(this);
     this.doSum = this.doSum.bind(this);
+    this.dateString = this.dateString.bind(this);
   }
 
   handleDates(date: any, date2: any) {
@@ -186,6 +198,14 @@ class CartSideBar extends React.Component<{
     return;
   }
 
+  dateString(dateStr: any) {
+    return new Date(dateStr).toDateString();
+  }
+
+  handleDelete(event: any) {
+    this.props.itemStore.removeItem(event);
+    this.doSum();
+  }
   componentDidMount() {
     this.doSum();
   }
@@ -217,15 +237,60 @@ class CartSideBar extends React.Component<{
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
-              <div className="modal-body"></div>
+              <div className="modal-body">
+                {this.props.itemStore.itemList.length > 0 ? (
+                  <div>
+                    {this.props.itemStore.itemList.map(
+                      (data: any, index: number) => {
+                        return (
+                          <div className="row" key={uuidv4()}>
+                            <div key={index} className="col-sm">
+                              <img
+                                key={uuidv4()}
+                                src={data[0].ImgLink0}
+                                className="figure-img img-fluid rounded img-cart"
+                                alt="cart item"
+                              ></img>
+                            </div>
+                            <div key={uuidv4()} className="col-sm">
+                              {data[0].Title}
+                            </div>
+                            <div key={uuidv4()} className="col-sm">
+                              R {data[0].Price}/day
+                            </div>
+                            <div key={uuidv4()} className="col-sm">
+                              From {this.dateString(data[1])} to{" "}
+                              {this.dateString(data[2])}
+                            </div>
+                            <div key={uuidv4()} className="col-sm">
+                              <button
+                                className="cart-btn btn-danger"
+                                onClick={() => this.handleDelete(index)}
+                              >
+                                <FontAwesomeIcon icon={faTrashAlt} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                    <div>
+                      <ColoredLine />
+                      Total {this.state.itemsTot}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {" "}
+                    Looks Like you do not have items in your cart, go ahead and
+                    add some
+                  </div>
+                )}
+              </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-dismiss="modal"
-                >
+                <a href="/mycart" className="btn btn-secondary btn-lg active">
                   Order and Checkout
-                </button>
+                </a>
               </div>
             </div>
           </div>

@@ -2,3 +2,180 @@ cart-btn {
   width: 30%;
   position: fixed;
 }
+
+.prog {
+  display: flex;
+  margin-bottom: 50px;
+  justify-content: space-between;
+  width: 100%;
+  height: 1px;
+}
+
+.step {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 25px;
+  height: 25px;
+  margin-bottom: 30px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background-color: #efefef;
+}
+
+.step.active {
+  background-color: #1abc9c;
+  transition: ease-in-out;
+}
+
+.step:after {
+  position: absolute;
+  z-index: -1;
+  top: 5px;
+  left: 22px;
+  width: 225px;
+  height: 6px;
+  content: "";
+  background-color: #efefef;
+}
+
+.step:before {
+  color: #2e2e2e;
+  position: absolute;
+  top: 40px;
+}
+
+.step:last-child:after {
+  content: none;
+}
+
+.step.active {
+  background-color: #1abc9c;
+}
+.step.active:after {
+  background-color: #1abc9c;
+}
+.step.active:before {
+  color: #1abc9c;
+}
+.step.active + .step {
+  background-color: #1abc9c;
+}
+.step.active + .step:before {
+  color: #1abc9c;
+}
+
+.step:nth-child(1):before {
+  content: "Cart";
+}
+.step:nth-child(2):before {
+  right: -40px;
+  content: "Confirmation";
+}
+.step:nth-child(3):before {
+  right: -30px;
+  content: "Payment";
+}
+.step:nth-child(4):before {
+  right: 0;
+  content: "Finish";
+}
+
+.cart-container {
+  background-color: white;
+  padding: 5px 20px 15px 20px;
+  border: 1px solid #f2f2f2;
+  border-radius: 3px;
+}
+
+.row-margin {
+  margin-left: 25px;
+  margin-right: 25px;
+}
+
+.back-btn {
+  color: #1abc9c;
+  background: #fff;
+}
+
+.next-btn {
+  color: #fff;
+  background: #1abc9c;
+}
+
+.form-wrapper .section {
+  padding: 0px 20px 30px 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  background-color: #fff;
+  opacity: 0;
+  -webkit-transform: scale(1, 0);
+  -ms-transform: scale(1, 0);
+  -o-transform: scale(1, 0);
+  transform: scale(1, 0);
+  -webkit-transform-origin: top center;
+  -moz-transform-origin: top center;
+  -ms-transform-origin: top center;
+  -o-transform-origin: top center;
+  transform-origin: top center;
+  -webkit-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  min-height: 300px;
+}
+
+.form-wrapper .section.is-active {
+  opacity: 1;
+  -webkit-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  transform: scale(1, 1);
+}
+
+.form-wrapper .button,
+.form-wrapper .submit {
+  background-color: #3498db;
+  display: inline-block;
+  padding: 8px 30px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px !important;
+  font-family: "Open Sans", sans-serif !important;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+}
+
+.button-back {
+  background-color: #3498db;
+  display: inline-block;
+  padding: 8px 30px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px !important;
+  font-family: "Open Sans", sans-serif !important;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+}
+
+.form-wrapper .submit {
+  border: none;
+  outline: none;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.frm-wrap-edit {
+  margin-top: 50px;
+  margin-left: 0px;
+}

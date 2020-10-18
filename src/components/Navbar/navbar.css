@@ -5,3 +5,10 @@
 .alignCart {
   padding-top: 5px;
 }
+
+.img-cart {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 150px;
+}
