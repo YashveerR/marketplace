@@ -32,8 +32,10 @@ class MyCart extends Component<
       itemsTot: 0,
       tempLockId: "",
       userDetails: false,
-      classState: ["section is-active", "section", "section"],
+      classState: ["section is-active", "section", "section", "section"],
       classStatusState: ["step active", "step", "step", "step"],
+      saveAddress: false,
+      addrList: [],
     };
     this.handleClick = this.handleClick.bind(this);
     this.handleDates = this.handleDates.bind(this);
@@ -43,7 +45,21 @@ class MyCart extends Component<
     this.formBtnClick = this.formBtnClick.bind(this);
     this.simulateCO = this.simulateCO.bind(this);
     this.formBtnBackClick = this.formBtnBackClick.bind(this);
+    this.checkOnChange = this.checkOnChange.bind(this);
   }
+
+  checkOnChange = (event: any) => {
+    var temp: boolean;
+    temp = event.target.checked;
+    this.setState({ saveAddress: temp });
+    console.log(
+      "Is this item publi:",
+      event.target.checked,
+      temp,
+      !this.state.saveAddress,
+      event.target.value
+    );
+  };
 
   simulateCO() {
     toast.success("Yay! You Have successfully bought an item...");
@@ -142,17 +158,17 @@ class MyCart extends Component<
         temp[eventSrc] = "section";
         temp[eventSrc + 1] = "section is-active";
 
-        temp2[eventSrc + 1] = "step active";
+        temp2[eventSrc - 1] = "step active";
         break;
       case 1:
         temp[eventSrc] = "section";
         temp[eventSrc + 1] = "section is-active";
-        temp2[eventSrc + 1] = "step active";
+        temp2[eventSrc] = "step active";
         break;
       case 2:
         temp[eventSrc] = "section";
         temp[eventSrc + 1] = "section is-active";
-        temp2[eventSrc + 1] = "step active";
+        temp2[eventSrc] = "step active";
         break;
       case 3: //here is the actual payment stuff!!!! add the API here
         break;
@@ -168,20 +184,20 @@ class MyCart extends Component<
     var temp = [...this.state.classState];
     var temp2 = [...this.state.classStatusState];
     switch (eventSrc) {
-      case 0:
-        //do nothing for this one , or find a way to not show the button at all on 0
-        break;
       case 1:
-        temp[eventSrc] = "section";
-        temp[eventSrc - 1] = "section is-active";
-        temp2[eventSrc] = "step";
+        //do nothing for this one , or find a way to not show the button at all on 0
         break;
       case 2:
         temp[eventSrc] = "section";
         temp[eventSrc - 1] = "section is-active";
-        temp2[eventSrc] = "step";
+        temp2[eventSrc - 1] = "step";
         break;
-      case 3: //here is the actual payment stuff!!!! add the API here
+      case 3:
+        temp[eventSrc] = "section";
+        temp[eventSrc - 1] = "section is-active";
+        temp2[eventSrc - 1] = "step";
+        break;
+      case 4: //here is the actual payment stuff!!!! add the API here
         break;
       default:
         break;
@@ -286,6 +302,25 @@ class MyCart extends Component<
             this.setState({ areacode: _doc.data().areacode });
             this.setState({ terms: _doc.data().terms });
           });
+
+          this.props.firebase
+            .readDeliveryAddr(user.uid)
+            .then((doc: any) => {
+              var tempList: any = [];
+              doc.forEach((data: any) => {
+                tempList.push(data.data());
+                this.setState({ addrList: tempList });
+              });
+            })
+            .then((result: any) => {
+              var tempState = [...this.state.classState];
+              if (this.state.addrList.length > 0) {
+              } else {
+                tempState[0] = "section";
+                tempState[1] = "section is-active";
+                this.setState({ classState: tempState });
+              }
+            });
         }
       });
     } catch (exception) {
@@ -321,32 +356,58 @@ class MyCart extends Component<
                   className="form-wrapper frm-wrap-edit"
                   onSubmit={this.onSubmit}
                 >
-                  <fieldset className={this.state.classState[0]}>
-                    <h3>Billing Information</h3>
+                  {this.state.addrList.length > 0 ? (
+                    <fieldset className={this.state.classState[0]}>
+                      <h3>Select Delivery Address</h3>
+                    </fieldset>
+                  ) : null}
+                  <fieldset className={this.state.classState[1]}>
+                    <h3>Delivery Information</h3>
                     <div className="row">
                       <div className="col-md-4 mb-4">
-                        <input
-                          type="text"
-                          id="userName"
-                          placeholder="First Name"
-                        ></input>
-                        <input
-                          type="text"
-                          id="email"
-                          placeholder="lukeskywalker@etc.com"
-                        ></input>
+                        <div className="input-group mb-4">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="First Name"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                            id="firstName"
+                          ></input>
+                        </div>
+                        <div className="input-group mb-4">
+                          <input
+                            type="text"
+                            id="email"
+                            placeholder="lukeskywalker@etc.com"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                        </div>
                       </div>
                       <div className="col-md-4 mb-4">
-                        <input
-                          type="text"
-                          id="lastName"
-                          placeholder="Last Name"
-                        ></input>
-                        <input
-                          type="text"
-                          id="contact"
-                          placeholder="0831234567"
-                        ></input>
+                        <div className="input-group mb-4">
+                          {" "}
+                          <input
+                            type="text"
+                            id="lastName"
+                            placeholder="Last Name"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                        </div>
+                        <div className="input-group mb-4">
+                          <input
+                            type="text"
+                            id="contact"
+                            placeholder="0831234567"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                        </div>
                       </div>
                     </div>
                     <div className="row">
@@ -355,77 +416,131 @@ class MyCart extends Component<
                           type="text"
                           id="addressLine1"
                           placeholder="Your Address Here"
+                          className="form-control"
+                          aria-label="firstName"
+                          aria-describedby="basic-addon1"
                         ></input>
                         <input
                           type="text"
                           id="addressLine2"
-                          placeholder=""
+                          placeholder="Extra Address Space"
+                          className="form-control"
+                          aria-label="firstName"
+                          aria-describedby="basic-addon1"
                         ></input>
                       </div>
                     </div>
                     <div className="row">
                       <div className="col-md-4 mb-4">
-                        <select
-                          className="custom-select"
-                          id="Province"
-                          placeholder="Your Address Here"
-                        >
-                          {PROVINCES.map((data: string, index: number) => {
-                            return <option key={index}> {data}</option>;
-                          })}
-                        </select>
-                        <input
-                          type="text"
-                          id="Suburb"
-                          placeholder="Your Suburb/Town"
-                        ></input>
+                        <div className="input-group mb-4">
+                          {" "}
+                          <select
+                            className="custom-select frm-drp-dwn"
+                            id="Province"
+                            placeholder="Your Address Here"
+                          >
+                            {PROVINCES.map((data: string, index: number) => {
+                              return <option key={index}> {data}</option>;
+                            })}
+                          </select>
+                        </div>
+                        <div className="input-group mb-4">
+                          <input
+                            type="text"
+                            id="Suburb"
+                            placeholder="Your City"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                        </div>
+                        <div className="input-group mb-4">
+                          <input
+                            name="saveAddress"
+                            className="form-check-input check-box-edit"
+                            type="checkbox"
+                            id="defaultCheck1"
+                            onChange={this.checkOnChange}
+                          ></input>
+                          <label
+                            className="form-check-label check-lbl-edit"
+                            htmlFor="defaultCheck1"
+                          >
+                            Save address to Profile?
+                          </label>
+                        </div>
                       </div>
                       <div className="col-md-4 mb-4">
-                        <input
-                          type="text"
-                          id="city"
-                          placeholder="Your City/Suburb"
-                        ></input>
-                        <input
-                          type="text"
-                          id="postalCode"
-                          placeholder="2413"
-                        ></input>
+                        <div className="input-group mb-4">
+                          {" "}
+                          <input
+                            type="text"
+                            id="city"
+                            placeholder="Your Suburb"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                        </div>
+                        <div className="input-group mb-4">
+                          <input
+                            type="text"
+                            id="postalCode"
+                            placeholder="2413"
+                            className="form-control"
+                            aria-label="firstName"
+                            aria-describedby="basic-addon1"
+                          ></input>
+                          {this.state.saveAddress ? (
+                            <div className="input-group mb-4">
+                              <input
+                                type="text"
+                                id="addrNick"
+                                placeholder="Friendly Nickname"
+                                className="form-control"
+                                aria-label="firstName"
+                                aria-describedby="basic-addon1"
+                              ></input>
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                        </div>
                       </div>
                     </div>
 
                     <button
                       className="button"
-                      name="0"
+                      name="1"
                       onClick={this.formBtnClick}
                     >
                       Next
                     </button>
                   </fieldset>
-                  <fieldset className={this.state.classState[1]}>
+                  <fieldset className={this.state.classState[2]}>
                     {" "}
                     <h3>Account Type</h3>
                     <button
                       className="button"
-                      name="1"
+                      name="2"
                       onClick={this.formBtnClick}
                     >
                       Next
                     </button>
                     <button
                       className="button-back"
-                      name="1"
+                      name="2"
                       onClick={this.formBtnBackClick}
                     >
                       Back
                     </button>
                   </fieldset>
-                  <fieldset className={this.state.classState[2]}>
+                  <fieldset className={this.state.classState[3]}>
                     <h3>Choose a Password</h3>
                     <div className="button">Nothing Next...</div>
                     <button
                       className="button-back"
-                      name="2"
+                      name="3"
                       onClick={this.formBtnBackClick}
                     >
                       Back

@@ -205,6 +205,23 @@ class Firebase {
     );
   }
 
+  createDeliveryAddr(
+    docId: any,
+    addr1: string,
+    addr2: string,
+    suburbP: string,
+    provinceP: string,
+    areacodeP: string
+  ) {
+    this.db.collection("users").doc(docId).collection("myAddresses").add({
+      address: addr1,
+      address_0: addr2,
+      suburb: suburbP,
+      province: provinceP,
+      areacode: areacodeP,
+    });
+  }
+
   async createTempLock(docId: any, startTime: any, endTime: any) {
     return this.db
       .collection("items")
@@ -327,6 +344,10 @@ class Firebase {
 
   readCats(itemCatFilt: any) {
     return this.db.collection("items").where("Cat", "==", itemCatFilt).get();
+  }
+
+  readDeliveryAddr(uId: any) {
+    return this.db.collection("users").doc(uId).collection("myAddresses").get();
   }
 
   doUnsubListener() {

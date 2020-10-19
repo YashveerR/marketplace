@@ -71,7 +71,7 @@ cart-btn {
 }
 .step:nth-child(2):before {
   right: -40px;
-  content: "Confirmation";
+  content: "Delivery";
 }
 .step:nth-child(3):before {
   right: -30px;
@@ -178,4 +178,8 @@ cart-btn {
 .frm-wrap-edit {
   margin-top: 50px;
   margin-left: 0px;
+}
+
+.frm-drp-dwn {
+  margin-top: 5px;
 }
