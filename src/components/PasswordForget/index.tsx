@@ -73,6 +73,7 @@ class PasswordForgetFormBase extends Component<{ firebase: any }, any> {
             </div>
             <form onSubmit={this.onSubmit}>
               <input
+                required
                 name="email"
                 value={this.state.email}
                 onChange={this.onChange}

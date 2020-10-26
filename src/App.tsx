@@ -7,6 +7,7 @@ import AccountPage from "../src/components/Account";
 import AdminPage from "../src/components/Admin";
 import Search from "../src/components/Search";
 import MyCart from "../src/components/Mycart";
+import Checkout from "../src/components/Checkout";
 
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import * as ROUTES from "../src/constants/routes";
@@ -27,6 +28,7 @@ const App = () => (
       <Route path={ROUTES.MYITEMS} component={MyCart} />
       <Route path={ROUTES.CATSEARCH} component={CategorySearch} />
       <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
+      <Route path={ROUTES.CHECKOUT} component={Checkout} />
     </Switch>
   </BrowserRouter>
 );

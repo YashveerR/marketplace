@@ -18,3 +18,4 @@ export const CRAFT = "/craft";
 export const VIEWITEM = "/itemview";
 export const MYITEMS = "/mycart";
 export const CATSEARCH = "/cats";
+export const CHECKOUT = "/checkout";

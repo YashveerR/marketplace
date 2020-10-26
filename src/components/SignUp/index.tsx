@@ -83,41 +83,69 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
       username === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="username"
-          value={username}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Full Name"
-        />
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="passwordOne"
-          value={passwordOne}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <input
-          name="passwordTwo"
-          value={passwordTwo}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Confirm Password"
-        />
-        <button disabled={isInvalid} type="submit">
-          Sign Up
-        </button>
+      <div className="sign-in-container">
+        <figure aria-hidden="true">
+          <div className="person-body"></div>
+          <div className="neck skin"></div>
+          <div className="head skin">
+            <div className="eyes"></div>
+            <div className="mouth mouth-addon"></div>
+          </div>
+          <div className="hair"></div>
+          <div className="ears"></div>
+          <div className="shirt-1"></div>
+          <div className="shirt-2"></div>
+        </figure>
+        <form className="sign-form" onSubmit={this.onSubmit}>
+          <input
+            required
+            name="username"
+            value={username}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Full Name"
+          />
+          <input
+            required
+            name="email"
+            value={email}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Email Address"
+          />
+          <input
+            name="passwordOne"
+            value={passwordOne}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Password"
+          />
+          <input
+            required
+            name="passwordTwo"
+            value={passwordTwo}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Confirm Password"
+          />
+          <input
+            type="checkbox"
+            name="show-password"
+            className="form-check-input show-password a11y-hidden"
+            id="show-password"
+            tabIndex={3}
+          />
+          <label className="label-show-password" htmlFor="show-password">
+            <span>Show Password</span>
+          </label>
 
-        {error && <p>{error.message}</p>}
-      </form>
+          <button disabled={isInvalid} type="submit">
+            Sign Up
+          </button>
+
+          {error && <p>{error.message}</p>}
+        </form>
+      </div>
     );
   }
 }
