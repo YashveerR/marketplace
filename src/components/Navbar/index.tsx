@@ -13,7 +13,7 @@ import { withFirebase } from "../Firebase";
 import SignInPage from "../SignIn";
 import { v4 as uuidv4 } from "uuid";
 import { ColoredLine } from "../Search";
-import { withRouter } from "react-router-dom";
+import { NavLink, withRouter, Link } from "react-router-dom";
 
 const NavResult = ({ sessionStore, itemStore }: any) =>
   sessionStore.authUser ? <NavBarComp /> : <NavBarNoAuth />;
@@ -48,9 +48,9 @@ class NavBars extends React.Component<
             <Nav className="mr-auto">
               <Nav.Link href="/myitems">My Items</Nav.Link>
               <NavDropdown title="My Account" id="basic-nav-dropdown">
-                <NavDropdown.Item href={ROUTES.ACCOUNT}>
+                <Nav.Link as={Link} to={ROUTES.ACCOUNT}>
                   Account
-                </NavDropdown.Item>
+                </Nav.Link>
                 <NavDropdown.Divider />
                 <SignOutActs />
               </NavDropdown>
