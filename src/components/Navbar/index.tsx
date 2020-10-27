@@ -13,6 +13,7 @@ import { withFirebase } from "../Firebase";
 import SignInPage from "../SignIn";
 import { v4 as uuidv4 } from "uuid";
 import { ColoredLine } from "../Search";
+import { withRouter } from "react-router-dom";
 
 const NavResult = ({ sessionStore, itemStore }: any) =>
   sessionStore.authUser ? <NavBarComp /> : <NavBarNoAuth />;
@@ -300,17 +301,20 @@ class CartSideBar extends React.Component<
   }
 }
 const NavBarComp = compose(
+  withRouter,
   withFirebase,
   inject("itemStore"),
   observer
 )(NavBars);
 const NavBarNoAuth = compose(
+  withRouter,
   withFirebase,
   inject("itemStore"),
   observer
 )(NavBarsNoAuth);
 
 export default compose(
+  withRouter,
   withFirebase,
   inject("sessionStore"),
   inject("itemStore"),
