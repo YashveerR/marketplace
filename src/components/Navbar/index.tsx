@@ -25,6 +25,7 @@ class NavBars extends React.Component<
     itemStore: any;
     firebase: any;
     sessionsStore: any;
+    history: any;
   },
   any
 > {
@@ -75,6 +76,7 @@ class NavBars extends React.Component<
             firebase={this.props.firebase}
             itemStore={this.props.itemStore}
             sessionStore={this.props.sessionsStore}
+            history={this.props.history}
           />
         </div>
       </div>
@@ -89,6 +91,7 @@ class NavBarsNoAuth extends React.Component<
     itemStore: any;
     firebase: any;
     sessionsStore: any;
+    history: any;
   },
   any
 > {
@@ -152,6 +155,7 @@ class NavBarsNoAuth extends React.Component<
             firebase={this.props.firebase}
             itemStore={this.props.itemStore}
             sessionStore={this.props.sessionsStore}
+            history={this.props.history}
           />
         </div>
       </div>
@@ -167,6 +171,7 @@ class CartSideBar extends React.Component<
     firebase: any;
     itemStore: any;
     sessionStore: any;
+    history: any;
   },
   any
 > {
@@ -179,6 +184,7 @@ class CartSideBar extends React.Component<
     this.handleDates = this.handleDates.bind(this);
     this.doSum = this.doSum.bind(this);
     this.dateString = this.dateString.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleDates(date: any, date2: any) {
@@ -211,16 +217,21 @@ class CartSideBar extends React.Component<
     this.doSum();
   }
 
+  handleClick() {
+    this.props.history.push("/mycart");
+  }
+
   render() {
     return (
       <>
         <div
-          className="modal fade"
+          className="modal fade  preview-modal"
           id="exampleModalLong"
           tabIndex={-1}
           role="dialog"
           aria-labelledby="exampleModalLongTitle"
           aria-hidden="true"
+          data-backdrop=""
         >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
@@ -289,9 +300,12 @@ class CartSideBar extends React.Component<
                 )}
               </div>
               <div className="modal-footer">
-                <a href="/mycart" className="btn btn-secondary btn-lg active">
+                <button
+                  onClick={() => this.handleClick()}
+                  className="btn btn-secondary btn-lg active"
+                >
                   Order and Checkout
-                </a>
+                </button>
               </div>
             </div>
           </div>
