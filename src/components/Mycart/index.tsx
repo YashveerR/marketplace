@@ -440,6 +440,7 @@ class MyCart extends Component<
       formValids: "form-wrapper frm-wrap-edit was-validated",
     });
 
+    console.log("In the onSubmit proc");
     event.preventDefault();
     this.setState({ setValidated: true });
   };

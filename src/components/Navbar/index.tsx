@@ -13,7 +13,7 @@ import { withFirebase } from "../Firebase";
 import SignInPage from "../SignIn";
 import { v4 as uuidv4 } from "uuid";
 import { ColoredLine } from "../Search";
-import { NavLink, withRouter, Link } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 
 const NavResult = ({ sessionStore, itemStore }: any) =>
   sessionStore.authUser ? <NavBarComp /> : <NavBarNoAuth />;
