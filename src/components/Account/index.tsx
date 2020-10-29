@@ -13,7 +13,12 @@ import MyItems from "../MyItems";
 import MyOrders from "../MyOrders";
 import MyRentals from "../MyRentals";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
-class AccountPage extends Component<{ firebase: any; itemStore: any }, any> {
+import CartSideBar from "../CartPopUp";
+
+class AccountPage extends Component<
+  { firebase: any; itemStore: any; sessionStore: any; history: any },
+  any
+> {
   selectedOption: any;
   elementDisplay: any;
 
@@ -32,6 +37,10 @@ class AccountPage extends Component<{ firebase: any; itemStore: any }, any> {
   handleClick(index: any) {
     this.selectedOption = index;
     this.switchView();
+  }
+
+  viewCartQuick() {
+    this.setState({ showCartView: true });
   }
 
   switchView() {
@@ -84,14 +93,20 @@ class AccountPage extends Component<{ firebase: any; itemStore: any }, any> {
             </Nav>
             <Nav className="justify-content-end">
               <div className="alignCart">Cart</div>
-
-              <Nav.Link href="/mycart">
+              <Nav.Link
+                onClick={() => this.setState({ showCartView: true })}
+                data-toggle="modal"
+                data-target="#cartModal"
+              >
                 <FontAwesomeIcon className="fa-lg" icon={faShoppingCart} />
                 {this.props.itemStore.itemList.length}
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
+        <div>
+          <CartSideBar />
+        </div>
         {this.state.viewform ? this.elementDisplay : ""}
       </div>
     );

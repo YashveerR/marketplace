@@ -7,6 +7,7 @@ import { faTrashAlt, faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "./mycart.css";
+
 const ORDERED = "ordered";
 
 const PROVINCES = [
@@ -21,12 +22,14 @@ const PROVINCES = [
   "North West",
   "Free State",
 ];
+
 const validEmailRegex = RegExp(
   /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i // eslint-disable-line
 ); // eslint-disable-line
 const validNumberRegex = RegExp(
   /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
 );
+
 class MyCart extends Component<
   { firebase: any; itemStore: any; sessionStore: any },
   any
@@ -63,6 +66,7 @@ class MyCart extends Component<
         city: "",
         suburb: "",
       },
+      hashMd5: "",
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -227,6 +231,32 @@ class MyCart extends Component<
     this.doSum();
   }
 
+  calcPaymentCheckSum() {
+    var md5 = require("md5");
+
+    const params = new URLSearchParams({
+      merchant_id: "10000100",
+      merchant_key: "46f0cd694581a",
+      return_url: "https://marketplace-rent-a-thing.web.app/mycart",
+      // cancel_url: "https://yourApplication/paymentscreen",
+      // notify_url: "https://yourApplication/paymentscreen",
+      name_first: this.state.firstname,
+      name_last: this.state.lastname,
+      email_address: this.state.email,
+      // m_payment_id: unique_id_for_user,
+      amount: this.props.itemStore.basketTotal,
+      item_name: "Test Product",
+      //item_description: description_if_any,
+      //custom_int1: custome_integer_value_if_any,
+      //custom_str1: custome_string_value_if_any,
+      //custom_str2: custome_string_value_if_any,
+      passphrase: "2Pn9QerQ11yEPYqLvuGNQ",
+    });
+
+    // Create an MD5 signature of it.
+    const MD5Signature = md5(params.toString());
+    this.setState({ hashMd5: MD5Signature });
+  }
   formBtnClick(event: any) {
     //so we got here because we need to advance the form
     const eventSrc = parseInt(event.target.name);
@@ -430,18 +460,8 @@ class MyCart extends Component<
   }
 
   onSubmit = (event: any) => {
-    const form = event.currentTarget;
-
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    this.setState({
-      formValids: "form-wrapper frm-wrap-edit was-validated",
-    });
-
-    console.log("In the onSubmit proc");
     event.preventDefault();
+    console.log("In the submit form....");
     this.setState({ setValidated: true });
   };
 
@@ -470,7 +490,7 @@ class MyCart extends Component<
                   <form
                     className={this.state.formValids}
                     noValidate
-                    action="https://sandbox.payfast.co.za/eng/process"
+                    action="https://sandbox.payfast.co.za​/eng/process"
                     method="post"
                   >
                     {this.state.addrList.length > 0 ? (
@@ -787,12 +807,11 @@ class MyCart extends Component<
                         name="merchant_key"
                         value="46f0cd694581a"
                       ></input>
-                      <input type="hidden" name="amount" value="100.00"></input>
                       <input
                         type="hidden"
-                        name="item_name"
-                        value="Test Product"
-                      ></input>
+                        name="return_url"
+                        value="https://marketplace-rent-a-thing.web.app/mycart"
+                      />
                       <input
                         type="hidden"
                         name="name_first"
@@ -808,28 +827,22 @@ class MyCart extends Component<
                         name="email_address"
                         value={this.state.email || ""}
                       ></input>
+                      <input type="hidden" name="amount" value="100.00"></input>
                       <input
                         type="hidden"
-                        name="cell_number"
-                        value={this.state.contact || ""}
+                        name="item_name"
+                        value="Test Product"
                       ></input>
                       <input
                         type="hidden"
-                        name="email_confirmation"
-                        value="1"
-                      ></input>
+                        name="passphrase"
+                        value={process.env.REACT_APP_PAYFAST_PASSPHRASE || ""}
+                      />
                       <input
                         type="hidden"
-                        name="setup"
-                        value='{
-  "split_payment" : {
-    "merchant_id":10000105,
-    "percentage":10,
-    "min":100,
-    "max":100000
-  }
-}'
-                      ></input>
+                        name="signature"
+                        value={this.state.hashMd5 || ""}
+                      />
                       <button className="button" name="2" type="submit">
                         <FontAwesomeIcon icon={faCreditCard} />
                         Pay Now

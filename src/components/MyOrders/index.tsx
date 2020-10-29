@@ -52,63 +52,60 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
     return (
       <>
         <div>
-          <div>
-            {this.state.items.map((data: any, index: number) => {
-              return (
-                <div className="row srwedit" key={uuidv4()}>
-                  <div
-                    key={uuidv4()}
-                    className="col-md-2 mb-2 small-text class"
-                  >
-                    {"  "}
-                    {data.start}
-                  </div>
-                  <div
-                    key={uuidv4()}
-                    className="col-md-2 mb-2 small-text class"
-                  >
-                    {" "}
-                    {data.end}
-                  </div>
-                  <div
-                    key={uuidv4()}
-                    className="col-md-2 mb-2 small-text class"
-                  >
-                    {" "}
-                    {data.orderId}
-                  </div>
-                  <div
-                    key={uuidv4()}
-                    className="col-md-2 mb-2 small-text class"
-                  >
-                    {" "}
-                    {data.orderStatus}
-                  </div>
-                  <div
-                    key={uuidv4()}
-                    className="col-md-2 mb-2 small-text class"
-                  >
-                    {" "}
-                    {data.item}
-                  </div>
-                  <div key={uuidv4()} className="col-md-2 mb-2">
-                    <button
-                      className="btn btn-light msg-btn"
-                      onClick={() =>
-                        this.setState({
-                          showChat: true,
-                          chatOrderId: data.orderId,
-                          itemId: data.item,
-                        })
-                      }
+          {this.state.items.length > 0 ? (
+            <div>
+              {this.state.items.map((data: any, index: number) => {
+                return (
+                  <div className="row srwedit" key={uuidv4()}>
+                    <div
+                      key={uuidv4()}
+                      className="col-md-2 mb-2 small-text class"
                     >
-                      Message Owner
-                    </button>
+                      {new Date(data.start).toDateString()}
+                    </div>
+                    <div
+                      key={uuidv4()}
+                      className="col-md-2 mb-2 small-text class"
+                    >
+                      {new Date(data.end).toDateString()}
+                    </div>
+                    <div
+                      key={uuidv4()}
+                      className="col-md-2 mb-2 small-text class"
+                    >
+                      {data.orderId}
+                    </div>
+                    <div
+                      key={uuidv4()}
+                      className="col-md-2 mb-2 small-text class"
+                    >
+                      {data.orderStatus}
+                    </div>
+                    <div
+                      key={uuidv4()}
+                      className="col-md-2 mb-2 small-text class"
+                    >
+                      {data.item}
+                    </div>
+                    <div key={uuidv4()} className="col-md-2 mb-2">
+                      <button
+                        className="btn btn-light msg-btn"
+                        onClick={() =>
+                          this.setState({
+                            showChat: true,
+                            chatOrderId: data.orderId,
+                            itemId: data.item,
+                          })
+                        }
+                      >
+                        Message Owner
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : null}
           <div>
             {this.state.showChat ? (
               <Chat

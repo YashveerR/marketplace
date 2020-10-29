@@ -197,23 +197,6 @@ class DisplayItem extends Component<
               <div className="terms"> Delivery Terms </div>
               <div className="itemDesc"> Rental Policy and Terms</div>
               <div className="terms"> Rental Policy and Terms</div>
-              <div>
-                {this.props.itemStore.itemList.length > 0 ? (
-                  <ul>
-                    <li className="nav-item blink-edit">
-                      <a
-                        className="btn-primary blink-edit nav-link active"
-                        href="/mycart"
-                      >
-                        {" "}
-                        Go To Cart
-                      </a>
-                    </li>
-                  </ul>
-                ) : (
-                  ""
-                )}
-              </div>
             </div>
           </div>
 

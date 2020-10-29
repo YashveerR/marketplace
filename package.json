@@ -27,6 +27,7 @@
     "bootstrap": "^4.5.0",
     "firebase": "^7.23.0",
     "math.js": "^1.1.46",
+    "md5": "^2.3.0",
     "mobx": "^5.15.4",
     "mobx-react": "^6.2.2",
     "mobx-react-lite": "^2.0.7",
