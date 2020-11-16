@@ -241,6 +241,68 @@ class Firebase {
       .add({ startDate: startTime, endDate: endTime });
   }
 
+  createSavedAddress(
+    address1: string,
+    address2: string,
+    email: string,
+    contact: string,
+    province: string,
+    city: string,
+    suburb: string,
+    postalcode: string,
+    alias: string,
+    uId: string
+  ) {
+    this.db
+      .collection("users")
+      .doc(uId)
+      .collection("myAddresses")
+      .doc(alias)
+      .set(
+        {
+          addr1: address1,
+          addr2: address2,
+          email: email,
+          contact: contact,
+          province: province,
+          city: city,
+          suburb: suburb,
+          postalCode: postalcode,
+        },
+        { merge: true }
+      );
+  }
+
+  createCollatedOrder(
+    userId: any,
+    items: [],
+    fname: string,
+    lname: string,
+    address1: string,
+    address2: string,
+    email: string,
+    contact: string,
+    province: string,
+    city: string,
+    suburb: string,
+    postalcode: string
+  ) {
+    return this.db.collection("orders").doc(userId).collection("myOrders").add({
+      items: items,
+      paymentStat: "incomplete",
+      firstName: fname,
+      lastName: lname,
+      addr1: address1,
+      addr2: address2,
+      email: email,
+      contact: contact,
+      province: province,
+      city: city,
+      suburb: suburb,
+      postalCode: postalcode,
+    });
+  }
+
   createMyOrder(
     docId: any,
     itemId: any,
@@ -326,6 +388,33 @@ class Firebase {
     );
   }
 
+  updateCollatedOrder(
+    userId: string,
+    docId: string,
+    payGWStat: string,
+    orderIds: [],
+    payGWId: string
+  ) {
+    return this.db
+      .collection("orders")
+      .doc(userId)
+      .collection("myOrders")
+      .doc(docId)
+      .update({
+        paymentStat: payGWStat,
+        orderIDs: orderIds,
+        paymentID: payGWId,
+      });
+  }
+
+  readPaymentStat(uId: string, docId: string) {
+    return this.db
+      .collection("orders")
+      .doc(uId)
+      .collection("myOrders")
+      .doc(docId)
+      .get();
+  }
   readUserItems(uId: any) {
     return this.db.collection("items").where("author", "==", uId).get();
   }
@@ -461,7 +550,7 @@ class Firebase {
       .delete();
   }
 
-  readDateLocks(docId: any) {
+  async readDateLocks(docId: any) {
     return this.db
       .collection("items")
       .doc(docId)

@@ -288,7 +288,7 @@ class CartSideBar extends React.Component<
                     )}
                     <div>
                       <ColoredLine />
-                      Total {this.state.itemsTot}
+                      Total {this.props.itemStore.basketTotal}
                     </div>
                   </div>
                 ) : (

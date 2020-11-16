@@ -8,8 +8,6 @@ import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "./mycart.css";
 
-const ORDERED = "ordered";
-
 const PROVINCES = [
   "",
   "Gauteng",
@@ -41,8 +39,8 @@ class MyCart extends Component<
       itemsTot: 0,
       tempLockId: "",
       userDetails: false,
-      classState: ["section is-active", "section", "section", "section"],
-      classStatusState: ["step active", "step", "step", "step"],
+      classState: ["section is-active ", "section ", "section"],
+      classStatusState: ["step active ", "step ", "step"],
       saveAddress: false,
       addrList: [],
       noUser: false,
@@ -67,6 +65,7 @@ class MyCart extends Component<
         suburb: "",
       },
       hashMd5: "",
+      paymentPending: true,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -75,7 +74,7 @@ class MyCart extends Component<
     this.checkOutClick = this.checkOutClick.bind(this);
     this.dateString = this.dateString.bind(this);
     this.formBtnClick = this.formBtnClick.bind(this);
-    this.simulateCO = this.simulateCO.bind(this);
+
     this.formBtnBackClick = this.formBtnBackClick.bind(this);
     this.checkOnChange = this.checkOnChange.bind(this);
   }
@@ -144,68 +143,6 @@ class MyCart extends Component<
     );
   };
 
-  simulateCO() {
-    toast.success("Yay! You Have successfully bought an item...");
-    const newLocal = JSON.parse(window.localStorage.getItem("lockIds") || "{}");
-    let storeInt = newLocal;
-    //TODO: complete add item in users queue
-    //TODO: execute a firestore function to send an email confirmation of order etc. etc. etc.
-    try {
-      this.props.itemStore.itemList.forEach((listedItems: any) => {
-        this.props.firebase
-          .createRentedDate(
-            listedItems[3],
-            new Date(listedItems[1]),
-            new Date(listedItems[2])
-          )
-          .then((invoiceId: any) => {
-            this.props.firebase.createOwnerOrder(
-              listedItems[0].author,
-              this.props.firebase.auth.currentUser["uid"],
-              invoiceId.id,
-              ORDERED,
-              listedItems[0].Title,
-              new Date(listedItems[1]),
-              new Date(listedItems[2]),
-              listedItems[3]
-            );
-            this.props.firebase.createMyOrder(
-              this.props.firebase.auth.currentUser["uid"],
-              listedItems[3],
-              invoiceId.id,
-              new Date(listedItems[1]),
-              new Date(listedItems[2]),
-              ORDERED
-            );
-            this.props.firebase.createChatLink(
-              listedItems[0].author,
-              this.props.firebase.auth.currentUser["uid"],
-              invoiceId.id
-            );
-          });
-      });
-      this.setState({ justOrdered: true });
-    } catch (exception) {
-      console.log("Error in creating order");
-    }
-
-    storeInt.lockedItems.forEach((data: any) => {
-      try {
-        this.props.firebase.deleteDateLocks(data[0], data[1]);
-      } catch (exception) {
-        alert("Hmmmm... couldn't delete temporary reservation");
-      }
-    });
-
-    try {
-    } catch (exception) {}
-
-    //
-    this.removeLocalStorage();
-    this.props.itemStore.empty();
-    this.setState({ itemsTot: 0 });
-  }
-
   dateString(dateStr: any) {
     return new Date(dateStr).toDateString();
   }
@@ -235,20 +172,20 @@ class MyCart extends Component<
     var md5 = require("md5");
 
     const params = new URLSearchParams({
-      merchant_id: "10000100",
-      merchant_key: "46f0cd694581a",
-      return_url: "https://marketplace-rent-a-thing.web.app/mycart",
+      merchant_id: "10020541",
+      merchant_key: "kki8ne2m55r38",
+      return_url: "https://cd77dd1d807b.ngrok.io/paysuccess",
       // cancel_url: "https://yourApplication/paymentscreen",
-      // notify_url: "https://yourApplication/paymentscreen",
+      notify_url: "https://cd77dd1d807b.ngrok.io/webhook",
       name_first: this.state.firstname,
       name_last: this.state.lastname,
       email_address: this.state.email,
-      // m_payment_id: unique_id_for_user,
+      m_payment_id: this.state.paymentServerId,
       amount: this.props.itemStore.basketTotal,
       item_name: "Test Product",
       //item_description: description_if_any,
       //custom_int1: custome_integer_value_if_any,
-      //custom_str1: custome_string_value_if_any,
+      custom_str1: this.state.userId,
       //custom_str2: custome_string_value_if_any,
       passphrase: "2Pn9QerQ11yEPYqLvuGNQ",
     });
@@ -281,13 +218,13 @@ class MyCart extends Component<
           temp[eventSrc + 1] = "section is-active";
           temp2[eventSrc] = "step active";
 
-          console.log("we are in 1");
+          this.checkOutClick();
           break;
         case 2:
           //temp[eventSrc] = "section";
           //temp[eventSrc + 1] = "section is-active";
           //temp2[eventSrc] = "step active";
-          this.checkOutClick();
+
           break;
         case 3: //here is the actual payment stuff!!!! add the API here
           break;
@@ -337,19 +274,21 @@ class MyCart extends Component<
   async checkOutClick() {
     let conflict = false;
     let lockIds: any[] = [];
+    let tempIds: string[] = [];
 
     console.log(
       lockIds,
       JSON.parse(window.localStorage.getItem("lockIds") || "{}")
     );
     //I think before checkout we have to have them singUp...and have valid addresses...
+    //switch to await promise all here!!!! will help later.
     try {
       this.props.sessionStore.authUser
-        ? this.props.itemStore.itemList.forEach((list: any) => {
-            this.props.firebase
+        ? await this.props.itemStore.itemList.forEach(async (list: any) => {
+            await this.props.firebase
               .readDateLocks(list[3])
-              .then((allItems: any) => {
-                allItems.forEach((data: any) => {
+              .then(async (allItems: any) => {
+                await allItems.forEach((data: any) => {
                   //check the dates at the first one break and result in a conflict message
                   const serverStart = new Date(data.data()["start"]);
                   const serverEnd = new Date(data.data()["end"]);
@@ -386,31 +325,36 @@ class MyCart extends Component<
                   );
                 }
               });
+            tempIds.push(list[3]); //push the ID's
           })
         : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
     } catch (exception) {
       alert("Error in the order.");
     }
-    //call checkout stuff here, on success clear cart and local storage and start the communications
-    //workflow....the correct way to do these would be to create nice objects instead of these
-    //silly array indices which for all intensive purposes have no meaning here..... tisk tisk!!!!!
-    //THIS GOES FOR ALL PLACES YOU USE THESE RUBBISH!!!!!!!!!
-    /*
-    toast.success("Yay! You Have successfully bought an item...");
 
-    this.props.itemStore.itemList.map((listedItems: any) => {
-      this.props.firebase.createRentedDate(
-        listedItems[3],
-        new Date(listedItems[1]).toDateString(),
-        new Date(listedItems[2]).toDateString()
-      );
-    });
-    //this.removeLocalStorage();
-    */
-  }
-
-  removeLocalStorage() {
-    window.localStorage.removeItem("lockIds");
+    if (this.state.paymentPending === true) {
+      this.props.firebase
+        .createCollatedOrder(
+          this.props.firebase.auth.currentUser["uid"],
+          tempIds,
+          this.state.firstname,
+          this.state.lastname,
+          this.state.addressLine1,
+          this.state.addressLine2,
+          this.state.email,
+          this.state.contact,
+          this.state.Province,
+          this.state.city,
+          this.state.Suburb,
+          this.state.postalCode
+        )
+        .then((doc: any) => {
+          console.log("document id for dummy ", doc.id);
+          this.setState({ paymentPending: true });
+          this.setState({ paymentServerId: doc.id });
+          window.localStorage.setItem("paymentId", doc.id);
+        });
+    }
   }
 
   componentDidMount() {
@@ -449,6 +393,21 @@ class MyCart extends Component<
                 this.setState({ classState: tempState });
               }
             });
+          if (window.localStorage.getItem("paymentId") != null) {
+            console.log("checking for payment status");
+            this.props.firebase
+              .readPaymentStat(
+                user.uid,
+                window.localStorage.getItem("paymentId" || "")
+              )
+              .then((doc: any) => {
+                console.log(doc.data());
+                doc.data().paymentStat === "complete"
+                  ? this.setState({ paymentPending: false })
+                  : this.setState({ paymentPending: true });
+              });
+          }
+          this.setState({ userId: user.uid });
         } else {
           this.setState({ noUser: true });
           toast.error("Please Login to Continue");
@@ -800,17 +759,22 @@ class MyCart extends Component<
                       <input
                         type="hidden"
                         name="merchant_id"
-                        value={10000100}
+                        value={10020541}
                       ></input>
                       <input
                         type="hidden"
                         name="merchant_key"
-                        value="46f0cd694581a"
+                        value="kki8ne2m55r38"
                       ></input>
                       <input
                         type="hidden"
                         name="return_url"
-                        value="https://marketplace-rent-a-thing.web.app/mycart"
+                        value="https://cd77dd1d807b.ngrok.io/paysuccess"
+                      />
+                      <input
+                        type="hidden"
+                        name="notify_url"
+                        value="https://cd77dd1d807b.ngrok.io/webhook"
                       />
                       <input
                         type="hidden"
@@ -827,11 +791,21 @@ class MyCart extends Component<
                         name="email_address"
                         value={this.state.email || ""}
                       ></input>
+                      <input
+                        type="hidden"
+                        name="m_payment_id"
+                        value={this.state.paymentServerId || ""}
+                      ></input>
                       <input type="hidden" name="amount" value="100.00"></input>
                       <input
                         type="hidden"
                         name="item_name"
                         value="Test Product"
+                      ></input>
+                      <input
+                        type="hidden"
+                        name="custom_str1"
+                        value={this.state.userId || ""}
                       ></input>
                       <input
                         type="hidden"
@@ -850,21 +824,6 @@ class MyCart extends Component<
                       <button
                         className="button-back"
                         name="2"
-                        onClick={this.formBtnBackClick}
-                      >
-                        Back
-                      </button>
-                    </fieldset>
-                    <fieldset className={this.state.classState[3]}>
-                      <h3>Order Complete</h3>
-                      <div className="circle-loader">
-                        <div className="checkmark draw"></div>
-                      </div>
-
-                      <div className="button">Nothing Next...</div>
-                      <button
-                        className="button-back"
-                        name="3"
                         onClick={this.formBtnBackClick}
                       >
                         Back
@@ -896,12 +855,6 @@ class MyCart extends Component<
                   }
                 )}
                 <div>Total: R {this.props.itemStore.basketTotal}</div>
-                <div>
-                  <button onClick={this.simulateCO}>
-                    <FontAwesomeIcon icon={faCreditCard} />
-                    Simulate Return from Payments
-                  </button>
-                </div>
               </div>
             </div>
           ) : (

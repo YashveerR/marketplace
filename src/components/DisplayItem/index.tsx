@@ -100,9 +100,6 @@ class DisplayItem extends Component<
     } else {
       toast.warn("Successfully added item to basket ");
     }
-    //this.props.itemStore.empty();
-    //set this state to true so we can display a navigate to cart button.....
-    this.setState({ itemsInCart: true });
   }
 
   componentDidUpdate(props: any) {

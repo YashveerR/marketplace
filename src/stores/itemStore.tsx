@@ -34,6 +34,11 @@ class ItemStore {
     } else {
       this.itemList.push([items, startDate, endDate, dbID]);
       this.listError = "none";
+      this.basketTotal +=
+        parseInt(items.Price) *
+        (Math.abs(new Date(endDate).valueOf() - new Date(startDate).valueOf()) /
+          86400000 +
+          1);
     }
   };
 
@@ -60,11 +65,19 @@ class ItemStore {
   };
 
   @action removeItem = (index: number) => {
+    this.basketTotal -=
+      parseInt(this.itemList[index][0].Price) *
+      (Math.abs(
+        new Date(this.itemList[index][2]).valueOf() -
+          new Date(this.itemList[index][1]).valueOf()
+      ) /
+        86400000 +
+        1);
     this.itemList.splice(index, 1);
-    this.total();
   };
 
   private total = () => {
+    this.basketTotal = 0;
     this.itemList.forEach((data: any) => {
       this.basketTotal +=
         parseInt(data[0].Price) *

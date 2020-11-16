@@ -14,6 +14,7 @@ import * as ROUTES from "../src/constants/routes";
 import { withAuthentication } from "../src/components/Session";
 import DisplayItem from "./components/DisplayItem";
 import CategorySearch from "./components/CategorySearch";
+import TransactionSuccess from "./components/TransactionSuccess";
 
 const App = () => (
   <Switch>
@@ -28,6 +29,7 @@ const App = () => (
     <Route path={ROUTES.CATSEARCH} component={CategorySearch} />
     <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
     <Route path={ROUTES.CHECKOUT} component={Checkout} />
+    <Route path={ROUTES.PAYMENT_PASS} component={TransactionSuccess} />
   </Switch>
 );
 

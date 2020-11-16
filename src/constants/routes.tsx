@@ -19,3 +19,5 @@ export const VIEWITEM = "/itemview";
 export const MYITEMS = "/mycart";
 export const CATSEARCH = "/cats";
 export const CHECKOUT = "/checkout";
+export const PAYMENT_FAIL = "/paymentfail"
+export const PAYMENT_PASS = "/paysuccess"
