@@ -1,9 +1,13 @@
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 import sendGridClient = require("@sendgrid/mail");
 
-import admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
+const sharp = require("sharp");
+const fs = require("fs-extra");
+const { tmpdir } = require("os");
+const { dirname, join } = require("path");
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -127,3 +131,41 @@ exports.sendNewChatAlert = functions.https.onCall((data) => {
     });
   console.log(docRef);
 });
+
+exports.resizeImg = functions
+  .runWith({ memory: "2GB", timeoutSeconds: 120 })
+  .storage.object()
+  .onFinalize(handler);
+
+async function handler(object: any) {
+  const bucket = admin.storage().bucket(object.bucket);
+  const filePath = object.name;
+  const fileName = filePath.split("/").pop();
+  const bucketDir = dirname(filePath);
+
+  const workingDir = join(tmpdir(), "resize");
+  const tmpFilePath = join(workingDir, "source.png");
+
+  console.log(bucket, filePath, fileName, bucketDir);
+
+  if (fileName.includes("@s_") || !object.contentType.includes("image")) {
+    return false;
+  }
+
+  await bucket.file(filePath).download({ destination: tmpFilePath });
+
+  const sizes = [100];
+
+  const uploadPromises = sizes.map(async (size: any) => {
+    const ext = fileName.split(".").pop();
+    const imgName = fileName.replace(`.${ext}`, "");
+    const newImgName = `${imgName}@s_${size}.${ext}`;
+    const imgPath = join(workingDir, newImgName);
+    await sharp(tmpFilePath).resize({ width: size }).toFile(imgPath);
+
+    return bucket.upload(imgPath, { destination: join(bucketDir, newImgName) });
+  });
+
+  await Promise.all(uploadPromises);
+  return fs.remove(workingDir);
+}

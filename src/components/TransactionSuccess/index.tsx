@@ -31,6 +31,25 @@ class TransactionSuccess extends Component<
             const itemLocks = JSON.parse(
               window.localStorage.getItem("lockIds") || "{}"
             );
+            if (itemLocks.lockedItems.length > 0) {
+              console.log("LockIds that we are deleting from DB", itemLocks);
+              itemLocks.lockedItems.forEach((data: any, index: number) => {
+                try {
+                  console.log(data[index], data[index + 1]);
+                  this.props.firebase.deleteDateLocks(
+                    data[index],
+                    data[index + 1]
+                  );
+                } catch (exception) {
+                  alert("Hmmmm... couldn't delete temporary reservation");
+                }
+              });
+            } else {
+              console.log(
+                "itemlocks length not greater than 0",
+                itemLocks.lockedItems.length
+              );
+            }
             console.log("itemLocks read", itemLocks);
             await this.props.firebase
               .readPaymentStat(
@@ -78,32 +97,7 @@ class TransactionSuccess extends Component<
                     classSuccess: "circle-loader load-complete",
                   });
                   this.setState({ classTick: "block" });
-                  if (itemLocks.length > 0) {
-                    console.log(
-                      "LockIds that we are deleting from DB",
-                      itemLocks
-                    );
-                    itemLocks.lockedItems.forEach(
-                      (data: any, index: number) => {
-                        try {
-                          console.log(data[index], data[index + 1]);
-                          this.props.firebase.deleteDateLocks(
-                            data[index],
-                            data[index + 1]
-                          );
-                        } catch (exception) {
-                          alert(
-                            "Hmmmm... couldn't delete temporary reservation"
-                          );
-                        }
-                      }
-                    );
-                  } else {
-                    console.log(
-                      "itemlocks length not greater than 0",
-                      itemLocks.length
-                    );
-                  }
+
                   this.removeLocalStorage();
                   this.props.itemStore.empty();
                   this.setState({ itemsTot: 0 });
@@ -128,25 +122,27 @@ class TransactionSuccess extends Component<
   render() {
     return (
       <>
-        {this.state.allowed ? (
-          <>
-            <div>
-              <NavResult />
-            </div>
-            <div>
-              <h3>Order Complete</h3>
-              <div className={this.state.classSuccess}>
-                <div
-                  className="checkmark draw"
-                  style={{ display: this.state.classTick }}
-                ></div>
+        <div className="contain-div">
+          {this.state.allowed ? (
+            <>
+              <div>
+                <NavResult />
               </div>
-              <h3>Order Added to Account!</h3>
-            </div>{" "}
-          </>
-        ) : (
-          <>{this.state.syncCall ? <Redirect to="/" /> : null}</>
-        )}
+              <div>
+                <h3>Order Complete</h3>
+                <div className={this.state.classSuccess}>
+                  <div
+                    className="checkmark draw"
+                    style={{ display: this.state.classTick }}
+                  ></div>
+                </div>
+                <h3>Order Added to Account!</h3>
+              </div>{" "}
+            </>
+          ) : (
+            <>{this.state.syncCall ? <Redirect to="/" /> : null}</>
+          )}
+        </div>
       </>
     );
   }

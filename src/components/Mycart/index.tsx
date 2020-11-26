@@ -21,6 +21,9 @@ const PROVINCES = [
   "Free State",
 ];
 
+const ret_url = "";
+const notifi_url = "";
+
 const validEmailRegex = RegExp(
   /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i // eslint-disable-line
 ); // eslint-disable-line
@@ -174,9 +177,9 @@ class MyCart extends Component<
     const params = new URLSearchParams({
       merchant_id: "10020541",
       merchant_key: "kki8ne2m55r38",
-      return_url: "https://cd77dd1d807b.ngrok.io/paysuccess",
+      return_url: ret_url,
       // cancel_url: "https://yourApplication/paymentscreen",
-      notify_url: "https://cd77dd1d807b.ngrok.io/webhook",
+      notify_url: notifi_url,
       name_first: this.state.firstname,
       name_last: this.state.lastname,
       email_address: this.state.email,
@@ -325,14 +328,17 @@ class MyCart extends Component<
                   );
                 }
               });
-            tempIds.push(list[3]); //push the ID's
           })
         : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
     } catch (exception) {
       alert("Error in the order.");
     }
 
-    if (this.state.paymentPending === true) {
+    this.props.itemStore.itemList.forEach(async (list: any) => {
+      tempIds.push(list[3]);
+    });
+
+    if (conflict === false) {
       this.props.firebase
         .createCollatedOrder(
           this.props.firebase.auth.currentUser["uid"],
@@ -393,20 +399,6 @@ class MyCart extends Component<
                 this.setState({ classState: tempState });
               }
             });
-          if (window.localStorage.getItem("paymentId") != null) {
-            console.log("checking for payment status");
-            this.props.firebase
-              .readPaymentStat(
-                user.uid,
-                window.localStorage.getItem("paymentId" || "")
-              )
-              .then((doc: any) => {
-                console.log(doc.data());
-                doc.data().paymentStat === "complete"
-                  ? this.setState({ paymentPending: false })
-                  : this.setState({ paymentPending: true });
-              });
-          }
           this.setState({ userId: user.uid });
         } else {
           this.setState({ noUser: true });
@@ -766,15 +758,11 @@ class MyCart extends Component<
                         name="merchant_key"
                         value="kki8ne2m55r38"
                       ></input>
-                      <input
-                        type="hidden"
-                        name="return_url"
-                        value="https://cd77dd1d807b.ngrok.io/paysuccess"
-                      />
+                      <input type="hidden" name="return_url" value={ret_url} />
                       <input
                         type="hidden"
                         name="notify_url"
-                        value="https://cd77dd1d807b.ngrok.io/webhook"
+                        value={notifi_url}
                       />
                       <input
                         type="hidden"
@@ -796,7 +784,11 @@ class MyCart extends Component<
                         name="m_payment_id"
                         value={this.state.paymentServerId || ""}
                       ></input>
-                      <input type="hidden" name="amount" value="100.00"></input>
+                      <input
+                        type="hidden"
+                        name="amount"
+                        value={this.props.itemStore.basketTotal}
+                      ></input>
                       <input
                         type="hidden"
                         name="item_name"

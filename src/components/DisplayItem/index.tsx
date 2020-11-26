@@ -30,12 +30,13 @@ class DisplayItem extends Component<
       fileThree: "",
       publicItem: false,
       data: [],
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: "",
+      endDate: "",
       tempSDate: new Date(),
       tempEDate: null,
       allItemDates: [],
       exclusionDates: [],
+      enableBtn: true,
     };
     this.addToCart = this.addToCart.bind(this);
   }
@@ -71,12 +72,14 @@ class DisplayItem extends Component<
   handleChangeEnd = (date: any) => {
     this.setState({
       endDate: date,
+      enableBtn: false,
     });
   };
 
   addToCart() {
-    console.log(
-      "updating cart and return value",
+    //Do a quick check for cart dates correctness.. error checking...
+
+    if (this.state.startDate.getTime() <= this.state.endDate.getTime()) {
       this.props.itemStore.addItems(
         this.state.data,
         new Date(
@@ -92,18 +95,26 @@ class DisplayItem extends Component<
           0
         ),
         this.props.location.state.selectedID
-      )
-    );
+      );
 
-    if (this.props.itemStore.listError === "duplicate item") {
-      toast.error("🕷 Error detected in basket");
+      this.setState({
+        enableBtn: true,
+        startDate: "",
+        endDate: "",
+      });
+      if (this.props.itemStore.listError === "duplicate item") {
+        toast.error("🕷 Error detected in basket");
+      } else {
+        toast.warn("Successfully added item to basket ");
+      }
     } else {
-      toast.warn("Successfully added item to basket ");
+      toast.error("Date selection error, try again!");
     }
-  }
-
-  componentDidUpdate(props: any) {
-    console.log("something has updated ....");
+    /*   
+    
+      
+    
+*/
   }
 
   render() {
@@ -144,6 +155,7 @@ class DisplayItem extends Component<
                 <div className="col-md-3 mb-3 text-class">
                   <div className="text-class"> Start Date</div>
                   <DatePicker
+                    placeholderText="Click to select a date"
                     selected={this.state.startDate}
                     onChange={(sDate) => this.handleChange(sDate)}
                     popperPlacement="bottom"
@@ -165,6 +177,7 @@ class DisplayItem extends Component<
                 <div className="col-md-3 mb-3 text-class">
                   <div className="text-class"> End Date</div>
                   <DatePicker
+                    placeholderText="Click to select a date"
                     selected={this.state.endDate}
                     onChange={this.handleChangeEnd}
                     minDate={new Date()}
@@ -186,7 +199,10 @@ class DisplayItem extends Component<
               </div>
               <div className="itemDesc">
                 {" "}
-                <button onClick={this.addToCart}>
+                <button
+                  onClick={this.addToCart}
+                  disabled={this.state.enableBtn}
+                >
                   <FontAwesomeIcon icon={faCartPlus} /> Add to Cart
                 </button>
               </div>

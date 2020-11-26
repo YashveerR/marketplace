@@ -6,7 +6,7 @@ const dns = require("dns");
 const axios = require("axios");
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./marketplace-rent-a-thing-firebase-adminsdk-rqu4o-a1c99d4532.json");
+var serviceAccount = require("./marketplace-rent-a-thing-f4dd07cddd47.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
