@@ -263,6 +263,7 @@ class Popup extends React.Component<
     };
 
     this.imgOnChange = this.imgOnChange.bind(this);
+    this.resizeImg = this.resizeImg.bind(this);
     // this.checkOnChange = this.checkOnChange.bind(this);
   }
 
@@ -342,6 +343,35 @@ class Popup extends React.Component<
               .then(() => {
                 this.props.toastRetval("Data Successfully Uploaded");
                 this.props.toastType(true);
+                let image_links: any[] = [];
+
+                var auto_resize_img = this.props.firebase.functions.httpsCallable(
+                  "resizeImg"
+                );
+                value.forEach((link: any) => {
+                  var link_split = link[0].split("/");
+                  var link_loc = link_split[link_split.length - 1];
+
+                  var link_str = link_loc.split("?alt");
+                  var link_real = link_str[0].replace(/%2F/g, "/");
+                  image_links.push(link_real);
+                  console.log("Link strings", link_real);
+                });
+                auto_resize_img({
+                  text: { path: image_links },
+                  context: "nothing to see here for now",
+                })
+                  .then(() => {
+                    console.log("Call to function passed...");
+                  })
+                  .catch(() => {
+                    console.log(
+                      "Error has returned when calling the resize func..."
+                    );
+                  });
+                console.log(JSON.stringify({ paths: image_links }));
+
+                //call the cloud function to resize images here
               });
           }
         },
@@ -367,6 +397,7 @@ class Popup extends React.Component<
     }
   };
 
+  resizeImg(stateName: string, fileName: string) {}
   checkOnChange = (event: any) => {
     this.setState({ publicItem: event.target.checked });
     console.log(

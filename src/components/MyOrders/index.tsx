@@ -61,13 +61,13 @@ class MyOrders extends React.Component<{ firebase: any }, any> {
                       key={uuidv4()}
                       className="col-md-2 mb-2 small-text class"
                     >
-                      {new Date(data.start).toDateString()}
+                      {data.start.toDate().toDateString()}
                     </div>
                     <div
                       key={uuidv4()}
                       className="col-md-2 mb-2 small-text class"
                     >
-                      {new Date(data.end).toDateString()}
+                      {data.end.toDate().toDateString()}
                     </div>
                     <div
                       key={uuidv4()}

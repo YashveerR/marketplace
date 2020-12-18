@@ -126,7 +126,7 @@ class Firebase {
         resolve(retImageArr);
       } else {
         let uploadTask = storageRef
-          .child(`itemImage/${uId}/${uuidv4()}`)
+          .child(`itemImage/${uId}/${uuidv4()}.jpg`)
           .put(image, metadata);
         // Listen for state changes, errors, and completion of the upload.
         uploadTask.on(

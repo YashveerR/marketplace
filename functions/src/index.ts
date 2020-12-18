@@ -4,6 +4,7 @@ import sendGridClient = require("@sendgrid/mail");
 
 admin.initializeApp();
 const db = admin.firestore();
+
 const sharp = require("sharp");
 const fs = require("fs-extra");
 const { tmpdir } = require("os");
@@ -132,8 +133,68 @@ exports.sendNewChatAlert = functions.https.onCall((data) => {
   console.log(docRef);
 });
 
-exports.resizeImg = functions
-  .runWith({ memory: "2GB", timeoutSeconds: 120 })
+exports.resizeImg = functions.https.onCall(async (data) => {
+  //const clientData = JSON.parse(data.text);
+  console.log(data.text.path);
+  let clientData = data.text.path;
+
+  const bucket = admin
+    .storage()
+    .bucket("gs://marketplace-rent-a-thing.appspot.com"); // dangers of hard coding this thing in meow....
+
+  clientData.forEach((filezPath: string) => {
+    console.log("in the loop: ", filezPath);
+    const filePath = filezPath;
+    const fileName = filePath.split("/").pop();
+    const bucketDir = dirname(filePath);
+    const workingDir = join(tmpdir(), "resize");
+    const tmpFilePath = join(workingDir, "source.png");
+
+    console.log(filePath, fileName, bucketDir, tmpFilePath);
+
+    const remoteFile = bucket.file(filePath);
+    return remoteFile.getMetadata().then(async ([metadata]) => {
+      console.log(metadata.metadata.firebaseStorageDownloadTokens);
+      await fs.ensureDir(workingDir);
+      await remoteFile.download({ destination: tmpFilePath });
+
+      const ext = fileName?.split(".").pop();
+      const imgName = fileName?.replace(`.${ext}`, "");
+      const newImgName = `${imgName}@s_${100}.${ext}`;
+      const imgPath = join(workingDir, newImgName);
+      await sharp(tmpFilePath)
+        .resize({ width: 640, height: 480 })
+        .toFile(imgPath)
+
+        .then((dat: any) => {
+          console.log("sharp succeeded");
+        })
+        .catch((err: any) => {
+          console.log("sharp failed");
+        });
+
+      remoteFile
+        .delete()
+        .then((dat: any) => {
+          console.log("deletion of file succeeded");
+        })
+        .catch((err: any) => {
+          console.log("deletion of file failed");
+        }); //remove the original file
+      return bucket.upload(imgPath, {
+        metadata: {
+          metadata: {
+            firebaseStorageDownloadTokens:
+              metadata.metadata.firebaseStorageDownloadTokens, //can generate a new uuid4 here or use the existing one and remove the file.
+            optimized: true,
+          },
+        },
+        destination: filePath,
+      });
+    });
+  });
+});
+/* .runWith({ memory: "2GB", timeoutSeconds: 120 })
   .storage.object()
   .onFinalize(handler);
 
@@ -152,6 +213,7 @@ async function handler(object: any) {
     return false;
   }
 
+  await fs.ensureDir(workingDir);
   await bucket.file(filePath).download({ destination: tmpFilePath });
 
   const sizes = [100];
@@ -169,3 +231,4 @@ async function handler(object: any) {
   await Promise.all(uploadPromises);
   return fs.remove(workingDir);
 }
+ */

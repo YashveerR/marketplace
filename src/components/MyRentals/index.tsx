@@ -113,7 +113,7 @@ class MyRentals extends React.Component<{ firebase: any }, any> {
   };
 
   dateString(dateStr: any) {
-    return new Date(dateStr).toDateString();
+    return dateStr.toDate().toDateString();
   }
 
   mapOrder(array: any, order: any, key: any) {
