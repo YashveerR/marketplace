@@ -21,8 +21,9 @@ const PROVINCES = [
   "Free State",
 ];
 
-const ret_url = "";
-const notifi_url = "";
+const ret_url = "https://marketplace-rent-a-thing.web.app/paysuccess";
+const notifi_url =
+  " https://us-central1-marketplace-rent-a-thing.cloudfunctions.net/webreq/webhook";
 
 const validEmailRegex = RegExp(
   /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i // eslint-disable-line
