@@ -3,7 +3,7 @@ import { compose } from "recompose";
 import { inject, observer } from "mobx-react";
 import NavResult from "../Navbar";
 import { withFirebase } from "../Firebase";
-import { Redirect } from "react-router-dom";
+
 import "./paysuccess.css";
 const ORDERED = "ordered";
 
