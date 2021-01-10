@@ -86,11 +86,14 @@ const pfValidSignature = (pfData, pfParamString, pfPassphrase = null) => {
       pfPassphrase.trim()
     ).replace(/%20/g, "+")}`;
   }
-
+	console.log("pfPassphrase", pfPassphrase);
+	console.log("pfParamString", pfParamString);
   const signature = crypto
     .createHash("md5")
     .update(pfParamString)
     .digest("hex");
+	console.log("sigs", signature);
+	console.log("actual sig", pfData["signature"]);
   return pfData["signature"] === signature;
 };
 

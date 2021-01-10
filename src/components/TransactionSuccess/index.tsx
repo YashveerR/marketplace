@@ -102,7 +102,7 @@ class TransactionSuccess extends Component<
                   this.props.itemStore.empty();
                   this.setState({ itemsTot: 0 });
                 } else {
-                  this.setState({ syncCall: true });
+                  this.setState({ syncCall: false });
                 }
               });
           }
@@ -140,7 +140,7 @@ class TransactionSuccess extends Component<
               </div>{" "}
             </>
           ) : (
-            <>{this.state.syncCall ? <Redirect to="/" /> : null}</>
+            <></>
           )}
         </div>
       </>

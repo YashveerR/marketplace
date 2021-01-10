@@ -312,16 +312,18 @@ const pfValidSignature = (
 ) => {
   // Calculate security signature
   //let tempParamString = "";
+  console.log("Comparing stuff for saltiness: ", pfParamString, pfPassphrase);
   if (pfPassphrase !== null) {
     pfParamString += `&passphrase=${encodeURIComponent(
       pfPassphrase.trim()
     ).replace(/%20/g, "+")}`;
   }
-
+  console.log("pfParamString", pfParamString);
   const signature = crypto
     .createHash("md5")
     .update(pfParamString)
     .digest("hex");
+  console.log("Signature comparisons", signature, pfData["signature"]);
   return pfData["signature"] === signature;
 };
 
@@ -349,15 +351,15 @@ const pfValidIP = async (req: any) => {
   ];
 
   let q: any[] = [];
-  let res = false;
+  let temp_val = false;
   let validIps;
   let p;
-
+  let a;
   const pfIp = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
   try {
     console.log("WTF is happening here!!!!");
-    (async () => {
+    a = (async () => {
       await Promise.all(
         validHosts.map(async (k) => {
           console.log("attempting to map k", k);
@@ -374,18 +376,23 @@ const pfValidIP = async (req: any) => {
             }) !== undefined
           ) {
             console.log("We have found a valid IP address!");
-            res = true;
+            temp_val = true;
+          } else {
+            temp_val = false;
           }
         })
         .catch((error) => {
           console.log("There is an error here", error);
+          temp_val = false;
         });
-      return res;
+      return temp_val;
     })();
   } catch (err) {
     console.log("are we getting into the prmise? ");
     console.error(err);
   }
+  console.log("When are we returning from this functions????? ");
+  return a;
 };
 
 const pfValidServerConfirmation = async (

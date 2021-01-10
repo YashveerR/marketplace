@@ -22,8 +22,11 @@ const PROVINCES = [
 ];
 
 const ret_url = "https://marketplace-rent-a-thing.web.app/paysuccess";
+//const ret_url = "https://374062e65f81.ngrok.io/paysuccess";
+
 const notifi_url =
-  " https://us-central1-marketplace-rent-a-thing.cloudfunctions.net/webreq/webhook";
+  "https://us-central1-marketplace-rent-a-thing.cloudfunctions.net/webreq/webhook";
+//const notifi_url = "https://374062e65f81.ngrok.io/webhook";
 
 const validEmailRegex = RegExp(
   /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i // eslint-disable-line
@@ -360,6 +363,7 @@ class MyCart extends Component<
           this.setState({ paymentPending: true });
           this.setState({ paymentServerId: doc.id });
           window.localStorage.setItem("paymentId", doc.id);
+          this.calcPaymentCheckSum();
         });
     }
   }
