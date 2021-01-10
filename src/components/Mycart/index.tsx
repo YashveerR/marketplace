@@ -22,11 +22,11 @@ const PROVINCES = [
 ];
 
 const ret_url = "https://marketplace-rent-a-thing.web.app/paysuccess";
-//const ret_url = "https://374062e65f81.ngrok.io/paysuccess";
+//const ret_url = "https://4248382c5c81.ngrok.io/paysuccess";
 
 const notifi_url =
   "https://us-central1-marketplace-rent-a-thing.cloudfunctions.net/webreq/webhook";
-//const notifi_url = "https://374062e65f81.ngrok.io/webhook";
+//const notifi_url = "https://48ba0c33cfde.ngrok.io/webhook";
 
 const validEmailRegex = RegExp(
   /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i // eslint-disable-line

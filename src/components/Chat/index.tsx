@@ -80,7 +80,10 @@ class Chat extends React.Component<
         .collection("chat")
         .doc(this.props.chatId)
         .onSnapshot((snapshot: any) => {
-          this.setState({ msgStack: snapshot.data(), dataDl: true });
+          this.setState({ msgStack: snapshot.data() });
+          if (snapshot.data().messages.length > 0) {
+            this.setState({ dataDl: true });
+          }
         });
 
       this.props.firebase.auth.onAuthStateChanged((user: any) => {

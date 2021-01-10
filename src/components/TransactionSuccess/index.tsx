@@ -11,6 +11,9 @@ class TransactionSuccess extends Component<
   { firebase: any; itemStore: any; sessionStore: any },
   any
 > {
+  db: any;
+  unsubscribe: any;
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -19,6 +22,8 @@ class TransactionSuccess extends Component<
       classTick: "none",
       syncCall: false,
     };
+
+    this.db = this.props.firebase.db;
   }
 
   componentDidMount() {
@@ -51,13 +56,14 @@ class TransactionSuccess extends Component<
               );
             }
             console.log("itemLocks read", itemLocks);
-            await this.props.firebase
-              .readPaymentStat(
-                user.uid,
-                window.localStorage.getItem("paymentId" || "")
-              )
-              .then((doc: any) => {
-                if (doc.data().paymentStat === "complete") {
+            this.unsubscribe = this.db
+              .collection("orders")
+              .doc(user.uid)
+              .collection("myOrders")
+              .doc(window.localStorage.getItem("paymentId" || ""))
+              .onSnapshot((querySnapshot: any) => {
+                console.log("data has changed here meow", querySnapshot.data());
+                if (querySnapshot.data().paymentStat === "complete") {
                   this.setState({ allowed: true });
                   this.props.itemStore.itemList.forEach((listedItems: any) => {
                     this.props.firebase
@@ -115,6 +121,9 @@ class TransactionSuccess extends Component<
     //
   }
 
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
   removeLocalStorage() {
     window.localStorage.removeItem("lockIds");
     window.localStorage.removeItem("paymentId");
