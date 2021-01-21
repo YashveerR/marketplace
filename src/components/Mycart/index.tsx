@@ -73,6 +73,7 @@ class MyCart extends Component<
       },
       hashMd5: "",
       paymentPending: true,
+      alreadyChecked: false,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -224,8 +225,7 @@ class MyCart extends Component<
           temp[eventSrc] = "section";
           temp[eventSrc + 1] = "section is-active";
           temp2[eventSrc] = "step active";
-
-          this.checkOutClick();
+          if (this.state.alreadyChecked === false) this.checkOutClick();
           break;
         case 2:
           //temp[eventSrc] = "section";
@@ -279,6 +279,7 @@ class MyCart extends Component<
   }
 
   async checkOutClick() {
+    //Theres a bug here going back and the forward again causes a conflict...
     let conflict = false;
     let lockIds: any[] = [];
     let tempIds: string[] = [];
@@ -289,6 +290,7 @@ class MyCart extends Component<
     );
     //I think before checkout we have to have them singUp...and have valid addresses...
     //switch to await promise all here!!!! will help later.
+    //${list[1].split("T")[0]} ${list[2].split("T")[0]}
     try {
       this.props.sessionStore.authUser
         ? await this.props.itemStore.itemList.forEach(async (list: any) => {
@@ -304,10 +306,14 @@ class MyCart extends Component<
                     serverEnd.valueOf() <= new Date(list[2]).valueOf()
                   ) {
                     conflict = true;
+                    console.log(list, serverStart.toDateString(), serverEnd);
+                    //template string for the toast
                     toast.error(
-                      `Dates Taken for Item: ${list[0].Title} ${
-                        list[1].split("T")[0]
-                      } ${list[2].split("T")[0]}`
+                      `Dates Taken for Item: ${list[0].Title}
+
+                      Start: ${serverStart.toDateString()}
+
+                      End: ${serverEnd.toDateString()}`
                     );
                   }
                 });
@@ -359,13 +365,14 @@ class MyCart extends Component<
           this.state.postalCode
         )
         .then((doc: any) => {
-          console.log("document id for dummy ", doc.id);
           this.setState({ paymentPending: true });
           this.setState({ paymentServerId: doc.id });
           window.localStorage.setItem("paymentId", doc.id);
           this.calcPaymentCheckSum();
         });
     }
+
+    this.setState({ alreadyChecked: true });
   }
 
   componentDidMount() {

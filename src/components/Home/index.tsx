@@ -17,12 +17,15 @@ import entertain from "../../assets/entertain.jpg";
 import gaming from "../../assets/gaming.jpg";
 import books from "../../assets/books.jpg";
 import crafts from "../../assets/crafts.jpg";
+import outdoor from "../../assets/outdoor.jpg";
+import Information from "../Information";
 
 class Home extends Component<{ firebase: any; history: any }, any> {
   constructor(props: any) {
     super(props);
     this.state = {
       searchInput: "",
+      showModal: true,
     };
     this.keyPressed = this.keyPressed.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -39,20 +42,28 @@ class Home extends Component<{ firebase: any; history: any }, any> {
     books,
     gaming,
     crafts,
+    outdoor,
   ];
 
   categoriesArr = [
     "Electronics",
     "Homeware",
     "Tools",
-    "Sports",
-    "For the Kids",
+    "Sports Equipment",
+    "Kids",
     "Toys",
     "Entertainment",
     "Books",
     "Gaming",
     "Crafts",
+    "Outdoors",
   ];
+
+  viewNewItemForm() {
+    this.setState({
+      showModal: !this.state.showModal,
+    });
+  }
 
   onChange = (event: any) => {
     this.setState({ [event.target.name]: event.target.value });
@@ -158,6 +169,14 @@ class Home extends Component<{ firebase: any; history: any }, any> {
           draggable
           pauseOnHover
         ></ToastContainer>
+        {this.state.showModal ? (
+          <>
+            <Information
+              closePopUp={this.viewNewItemForm.bind(this)}
+              show={this.state.showModal}
+            />
+          </>
+        ) : null}
       </>
     );
   }

@@ -89,20 +89,24 @@ class Firebase {
     emailP: any,
     numberP: any,
     addressP: any,
+    address2P: any,
     suburbP: any,
     provinceP: any,
+    cityP: any,
     areacodeP: any,
     termsP: any
   ) {
-    this.db.collection("users").doc(recID).set(
+    return this.db.collection("users").doc(recID).set(
       {
         name: nameP,
         lastname: lastnameP,
         email: emailP,
         number: numberP,
         address: addressP,
+        address2: address2P,
         suburb: suburbP,
         province: provinceP,
+        city: cityP,
         areacode: areacodeP,
         terms: termsP,
       },

@@ -46,7 +46,6 @@ class NavBars extends React.Component<
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
-              <Nav.Link href="/myitems">My Items</Nav.Link>
               <NavDropdown title="My Account" id="basic-nav-dropdown">
                 <Nav.Link as={Link} to={ROUTES.ACCOUNT}>
                   Account

@@ -14,6 +14,7 @@ import MyOrders from "../MyOrders";
 import MyRentals from "../MyRentals";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import CartSideBar from "../CartPopUp";
+import { ToastContainer, toast } from "react-toastify";
 
 class AccountPage extends Component<
   { firebase: any; itemStore: any; sessionStore: any; history: any },
@@ -28,6 +29,7 @@ class AccountPage extends Component<
 
     this.state = {
       viewform: false,
+      terms: false,
     };
     this.handleClick = this.handleClick.bind(this);
     this.switchView = this.switchView.bind(this);
@@ -141,10 +143,13 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
             this.setState({ email: _doc.data().email });
             this.setState({ number: _doc.data().number });
             this.setState({ address: _doc.data().address });
+            this.setState({ address2: _doc.data().address2 });
+            this.setState({ city: _doc.data().city });
             this.setState({ suburb: _doc.data().suburb });
             this.setState({ province: _doc.data().province });
             this.setState({ areacode: _doc.data().areacode });
-            this.setState({ terms: _doc.data().terms });
+            if (_doc.data().terms === "") this.setState({ terms: false });
+            else this.setState({ terms: _doc.data().terms });
           })
       );
     } catch (exception) {
@@ -155,20 +160,26 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
   onSubmit = (event: any) => {
     try {
       event.preventDefault();
-      this.props.firebase.doUpdateUser(
-        this.props.firebase.auth.currentUser["uid"],
-        this.state.name,
-        this.state.lastname,
-        this.state.email,
-        this.state.number,
-        this.state.address,
-        this.state.suburb,
-        this.state.province,
-        this.state.areacode,
-        this.state.terms
-      );
+      if (this.state.terms === false) {
+        toast.error("Terms and Conditions are not accepted");
+      } else {
+        this.props.firebase.doUpdateUser(
+          this.props.firebase.auth.currentUser["uid"],
+          this.state.name,
+          this.state.lastname,
+          this.state.email,
+          this.state.number,
+          this.state.address,
+          this.state.address2,
+          this.state.suburb,
+          this.state.province,
+          this.state.city,
+          this.state.areacode,
+          this.state.terms
+        );
+      }
     } catch (exception) {
-      alert("An error has occured when uploading data :(");
+      console.log(exception);
     }
   };
   onChange = (event: any) => {
@@ -259,16 +270,16 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
               ></input>
             </div>
             <div className="col-md-4 mb-3 text-class">
-              <label htmlFor="validationDefault04">Suburb</label>
+              <label htmlFor="validationDefault04">Address Line Two</label>
               <input
-                name="suburb"
+                name="address2"
                 type="text"
                 className="form-control inputs-adjust "
                 id="validationDefault04"
-                placeholder="Province"
+                placeholder="Address line two"
                 required
                 onChange={this.onChange}
-                value={this.state.suburb || ""}
+                value={this.state.address2 || ""}
               ></input>
             </div>
           </div>
@@ -284,6 +295,34 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
                 required
                 onChange={this.onChange}
                 value={this.state.province || ""}
+              ></input>
+            </div>
+            <div className="col-md-4 mb-3 text-class">
+              <label htmlFor="validationDefault04">City</label>
+              <input
+                name="city"
+                type="text"
+                className="form-control inputs-adjust "
+                id="validationDefault04"
+                placeholder="City"
+                required
+                onChange={this.onChange}
+                value={this.state.city || ""}
+              ></input>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="col-md-4 mb-3 text-class">
+              <label htmlFor="validationDefault04">Suburb</label>
+              <input
+                name="suburb"
+                type="text"
+                className="form-control inputs-adjust "
+                id="validationDefault04"
+                placeholder="Suburb"
+                required
+                onChange={this.onChange}
+                value={this.state.suburb || ""}
               ></input>
             </div>
             <div className="col-md-4 mb-3 text-class">
@@ -305,15 +344,14 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
             {this.state.terms === "on" ? (
               <div className="text-class">Terms and Conditions accepted.</div>
             ) : (
-              <div>
+              <div className="form-check">
                 <input
                   name="terms"
                   type="checkbox"
                   className="form-check-input btn-submit"
                   id="invalidCheck2"
-                  onChange={this.onChange}
-                  value={this.state.terms || ""}
-                  checked={true}
+                  onClick={() => this.setState({ terms: !this.state.terms })}
+                  checked={this.state.terms || ""}
                 ></input>
                 <label
                   className="form-check-label checkbox-text"
@@ -328,6 +366,17 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
             Submit Information
           </button>
         </form>
+        <ToastContainer
+          position="top-center"
+          autoClose={10000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        ></ToastContainer>
       </div>
     );
   }

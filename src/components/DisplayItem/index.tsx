@@ -70,11 +70,36 @@ class DisplayItem extends Component<
   };
 
   handleChangeEnd = (date: any) => {
-    this.setState({
-      endDate: date,
-      enableBtn: false,
-    });
+    if (this.state.startDate !== "") {
+      this.setState({
+        endDate: date,
+        enableBtn: false,
+      });
+    } else {
+      toast.error("Please select a start date first!");
+      this.setState({
+        enableBtn: true,
+        startDate: "",
+        endDate: "",
+      });
+    }
   };
+
+  priceEstimate() {
+    if (this.state.startDate !== "" && this.state.endDate !== "") {
+      return (
+        parseInt(this.state.data.Price) *
+        (Math.abs(
+          new Date(this.state.endDate).valueOf() -
+            new Date(this.state.startDate).valueOf()
+        ) /
+          86400000 +
+          1)
+      );
+    } else {
+      return 0;
+    }
+  }
 
   addToCart() {
     //Do a quick check for cart dates correctness.. error checking...
@@ -125,7 +150,7 @@ class DisplayItem extends Component<
             <NavResult />
           </div>
           <div className="spacers">
-            Have the history categories here (clickable) / laurem ipsum etc /
+            {this.state.data.Cat} / {this.state.data.Title} /
           </div>
           <div className="spacers">
             <ColoredLine />
@@ -195,6 +220,12 @@ class DisplayItem extends Component<
                       },
                     }}
                   />
+                </div>
+                <div className="col-md-3 mb-3 text-class">
+                  <div className="text-class">
+                    {" "}
+                    Price Estimate : {this.priceEstimate()}{" "}
+                  </div>
                 </div>
               </div>
               <div className="itemDesc">

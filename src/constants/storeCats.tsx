@@ -9,5 +9,6 @@ export const STORECATS = [
   "Entertainment",
   "Books",
   "Gaming",
-  "Stationary and Crafts",
+  "Crafts",
+  "Outdoors",
 ];
