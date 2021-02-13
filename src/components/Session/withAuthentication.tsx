@@ -19,8 +19,7 @@ const withAuthentication = (Component: any) => {
       this.listener = this.props.firebase.onAuthUserListener(
         (authUser: any) => {
           localStorage.setItem("authUser", JSON.stringify(authUser));
-          localStorage.removeItem("lockIds");
-          localStorage.removeItem("paymentId");
+
           this.props.sessionStore.setAuthUser(authUser);
           console.log("Firebase user checked out");
         },

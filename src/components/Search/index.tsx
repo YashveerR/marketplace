@@ -60,11 +60,10 @@ class Search extends Component<any, any> {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  handleClick(event: any, index: any) {
-    console.log("event click on card");
+  handleClick(event: any, docId: any) {
     this.props.history.push("/itemview", {
       fromNotifications: event,
-      selectedID: this.state.itemIds[index],
+      selectedID: docId,
     });
   }
 
@@ -102,6 +101,9 @@ class Search extends Component<any, any> {
   async processSearch(searchItem: any) {
     let allDataList: any[] = [];
     let filteredList: any[] = [];
+    //let filteredListTest: any[] = [];
+    //let allDataListTest: any[] = [];
+
     const { fromNotifications } = searchItem;
 
     try {
@@ -111,16 +113,28 @@ class Search extends Component<any, any> {
           //store the entire dataset locally in the event that it requires to be used
           //again...therefore saving on DB reads...
           allItems.forEach((data: any) => {
-            allDataList.push(data.data());
+            //allDataList.push(data.data());
             this.state.itemIds.push(data.id);
+            allDataList.push([data.data(), data.id]);
           });
           this.setState({ allItems: allDataList });
-          filteredList = allDataList.filter((filt: any) => {
+          /*           filteredList = allDataList.filter((filt: any) => {
             return (
               filt.Title.toLowerCase().includes(
                 fromNotifications.toLowerCase()
               ) ||
               filt.Desc.toLowerCase().includes(fromNotifications.toLowerCase())
+            );
+          }); */
+          filteredList = allDataList.filter((filt: any) => {
+            console.log("Secondary filter functions: ", filt[0].Title);
+            return (
+              filt[0].Title.toLowerCase().includes(
+                fromNotifications.toLowerCase()
+              ) ||
+              filt[0].Desc.toLowerCase().includes(
+                fromNotifications.toLowerCase()
+              )
             );
           });
           this.setState({ filtItems: filteredList });
@@ -192,7 +206,7 @@ class Search extends Component<any, any> {
                   <>
                     <div className="row srwedit">
                       <div className="col-sm-5">
-                        Found: {this.state.filtItems.length} Items.
+                        Found: {this.state.filtItems.length} Item(s).
                       </div>
                       <div className="col-sm-7 col-editing">
                         <div className="dropdown">
@@ -240,11 +254,11 @@ class Search extends Component<any, any> {
                                     key={index}
                                     className="card container-card"
                                     onClick={() =>
-                                      this.handleClick(data, index)
+                                      this.handleClick(data[0], data[1])
                                     }
                                   >
                                     <img
-                                      src={data.ImgLink0}
+                                      src={data[0].ImgLink0}
                                       className="figure-img img-fluid rounded"
                                       alt="A "
                                       onLoad={() => this.showImage(index)}
@@ -254,10 +268,10 @@ class Search extends Component<any, any> {
                                       <div>
                                         <div className="card-body">
                                           <h5 className="card-title">
-                                            {data.Title}
+                                            {data[0].Title}
                                           </h5>
                                           <h5 className="card-title">
-                                            R {data.Price}/day
+                                            R {data[0].Price}/day
                                           </h5>
                                         </div>
                                         <div className="middle">

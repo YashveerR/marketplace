@@ -134,24 +134,25 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
   }
   componentDidMount() {
     try {
-      console.log(
-        this.props.firebase
-          .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
-          .then((_doc: any) => {
-            this.setState({ name: _doc.data().name });
-            this.setState({ lastname: _doc.data().lastname });
-            this.setState({ email: _doc.data().email });
+      this.props.firebase
+        .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
+        .then((_doc: any) => {
+          this.setState({ name: _doc.data().name });
+          this.setState({ lastname: _doc.data().lastname });
+          this.setState({ email: _doc.data().email });
+
+          if (_doc.data().address_list !== undefined) {
             this.setState({ number: _doc.data().number });
-            this.setState({ address: _doc.data().address });
-            this.setState({ address2: _doc.data().address2 });
-            this.setState({ city: _doc.data().city });
-            this.setState({ suburb: _doc.data().suburb });
-            this.setState({ province: _doc.data().province });
-            this.setState({ areacode: _doc.data().areacode });
-            if (_doc.data().terms === "") this.setState({ terms: false });
-            else this.setState({ terms: _doc.data().terms });
-          })
-      );
+            this.setState({ address: _doc.data().address_list[0].addr1 });
+            this.setState({ address2: _doc.data().address_list[0].addr2 });
+            this.setState({ city: _doc.data().address_list[0].city });
+            this.setState({ suburb: _doc.data().address_list[0].sub });
+            this.setState({ province: _doc.data().address_list[0].province });
+            this.setState({ areacode: _doc.data().address_list[0].zip });
+          }
+          if (_doc.data().terms === "") this.setState({ terms: false });
+          else this.setState({ terms: _doc.data().terms });
+        });
     } catch (exception) {
       alert("An error has occured fetching data :(");
     }
@@ -163,18 +164,22 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
       if (this.state.terms === false) {
         toast.error("Terms and Conditions are not accepted");
       } else {
+        const addr_obj = {
+          addr1: this.state.address,
+          addr2: this.state.address2,
+          sub: this.state.suburb,
+          province: this.state.province,
+          city: this.state.city,
+          zip: this.state.areacode,
+          friendlyName: "Home",
+        };
         this.props.firebase.doUpdateUser(
           this.props.firebase.auth.currentUser["uid"],
           this.state.name,
           this.state.lastname,
           this.state.email,
           this.state.number,
-          this.state.address,
-          this.state.address2,
-          this.state.suburb,
-          this.state.province,
-          this.state.city,
-          this.state.areacode,
+          addr_obj,
           this.state.terms
         );
       }
@@ -350,6 +355,7 @@ class AccountInfoPage extends Component<{ firebase: any }, any> {
                   type="checkbox"
                   className="form-check-input btn-submit"
                   id="invalidCheck2"
+                  onChange={() => {}}
                   onClick={() => this.setState({ terms: !this.state.terms })}
                   checked={this.state.terms || ""}
                 ></input>

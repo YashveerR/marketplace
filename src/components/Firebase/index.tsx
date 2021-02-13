@@ -1,4 +1,4 @@
-import app from "firebase/app";
+import app, { firestore } from "firebase/app";
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
@@ -88,30 +88,35 @@ class Firebase {
     lastnameP: any,
     emailP: any,
     numberP: any,
-    addressP: any,
-    address2P: any,
-    suburbP: any,
-    provinceP: any,
-    cityP: any,
-    areacodeP: any,
+    addr_list: any,
     termsP: any
   ) {
-    return this.db.collection("users").doc(recID).set(
-      {
-        name: nameP,
-        lastname: lastnameP,
-        email: emailP,
-        number: numberP,
-        address: addressP,
-        address2: address2P,
-        suburb: suburbP,
-        province: provinceP,
-        city: cityP,
-        areacode: areacodeP,
-        terms: termsP,
-      },
-      { merge: true }
-    );
+    return this.db
+      .collection("users")
+      .doc(recID)
+      .set(
+        {
+          name: nameP,
+          lastname: lastnameP,
+          email: emailP,
+          number: numberP,
+          address_list: firestore.FieldValue.arrayUnion(addr_list),
+          terms: termsP,
+        },
+        { merge: true }
+      );
+  }
+
+  updateAddrList(recID: string, addr_list: any) {
+    this.db
+      .collection("users")
+      .doc(recID)
+      .set(
+        {
+          address_list: firestore.FieldValue.arrayUnion(addr_list),
+        },
+        { merge: true }
+      );
   }
 
   async createImages(image: any, uId: any, itemName: any, itemCat: any) {
@@ -307,6 +312,42 @@ class Firebase {
     });
   }
 
+  updateBasketOrder(
+    userId: any,
+    items: [],
+    fname: string,
+    lname: string,
+    address1: string,
+    address2: string,
+    email: string,
+    contact: string,
+    province: string,
+    city: string,
+    suburb: string,
+    postalcode: string,
+    docId: string
+  ) {
+    return this.db
+      .collection("orders")
+      .doc(userId)
+      .collection("myOrders")
+      .doc(docId)
+      .update({
+        items: items,
+        paymentStat: "incomplete",
+        firstName: fname,
+        lastName: lname,
+        addr1: address1,
+        addr2: address2,
+        email: email,
+        contact: contact,
+        province: province,
+        city: city,
+        suburb: suburb,
+        postalCode: postalcode,
+      });
+  }
+
   createMyOrder(
     docId: any,
     itemId: any,
@@ -409,6 +450,13 @@ class Firebase {
         orderIDs: orderIds,
         paymentID: payGWId,
       });
+  }
+
+  updateAddressBook(userId: string, addr_new: any) {
+    return this.db
+      .collection("users")
+      .doc(userId)
+      .update({ address_list: this.fieldValue.arrayUnion(addr_new) });
   }
 
   readPaymentStat(uId: string, docId: string) {

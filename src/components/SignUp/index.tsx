@@ -6,6 +6,7 @@ import "./signup.css";
 
 const INITIAL_STATE = {
   username: "",
+  lastname: "",
   email: "",
   passwordOne: "",
   passwordTwo: "",
@@ -19,6 +20,7 @@ type MyProps = {
 };
 type MyState = {
   username: string;
+  lastname: string;
   email: string;
   passwordOne: string;
   passwordTwo: string;
@@ -39,7 +41,7 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
     this.state = { ...INITIAL_STATE };
   }
   onSubmit = (event: any) => {
-    const { username, email, passwordOne } = this.state;
+    const { username, lastname, email, passwordOne } = this.state;
     const roles = {};
 
     this.props.firebase
@@ -49,6 +51,7 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
         return this.props.firebase.user(authUser.user.uid).set(
           {
             username,
+            lastname,
             email,
             roles,
           },
@@ -74,13 +77,21 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
   };
 
   render() {
-    const { username, email, passwordOne, passwordTwo, error } = this.state;
+    const {
+      username,
+      lastname,
+      email,
+      passwordOne,
+      passwordTwo,
+      error,
+    } = this.state;
 
     const isInvalid =
       passwordOne !== passwordTwo ||
       passwordOne === "" ||
       email === "" ||
-      username === "";
+      username === "" ||
+      lastname === "";
 
     return (
       <div className="sign-in-container">
@@ -103,7 +114,15 @@ class SignUpFormBase extends Component<{ firebase: any; history: any }, any> {
             value={username}
             onChange={this.onChange}
             type="text"
-            placeholder="Full Name"
+            placeholder="Name"
+          />
+          <input
+            required
+            name="lastname"
+            value={lastname}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Last Name"
           />
           <input
             required

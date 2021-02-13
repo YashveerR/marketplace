@@ -7,6 +7,7 @@ import { faTrashAlt, faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { withFirebase } from "../Firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "./mycart.css";
+import { v4 as uuidv4 } from "uuid";
 
 const PROVINCES = [
   "",
@@ -46,10 +47,10 @@ class MyCart extends Component<
       itemsTot: 0,
       tempLockId: "",
       userDetails: false,
-      classState: ["section is-active ", "section ", "section"],
-      classStatusState: ["step active ", "step ", "step"],
+      classState: ["section is-active ", "section ", "section", "section"],
+      classStatusState: ["step active ", "step ", "step", "step"],
       saveAddress: false,
-      addrList: [],
+      address: [],
       noUser: false,
       validated: false,
       setValidated: false,
@@ -74,6 +75,9 @@ class MyCart extends Component<
       hashMd5: "",
       paymentPending: true,
       alreadyChecked: false,
+      addrChanged: false,
+      tickIndex: 0,
+      conflict: false,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -132,7 +136,9 @@ class MyCart extends Component<
       default:
         break;
     }
-    console.log(isError);
+    //if we have already created the order, but the user went back and changed the date
+    if (this.state.alreadyChecked === true)
+      this.setState({ addrChanged: true });
     this.setState({
       [event.target.name]: event.target.value,
       isError: isError,
@@ -209,31 +215,41 @@ class MyCart extends Component<
     var temp2 = [...this.state.classStatusState];
     const form = event.currentTarget;
     event.preventDefault();
-
-    if (form.form.checkValidity() === false) {
+    console.log("the event source is ... ", eventSrc);
+    if (
+      eventSrc !== 0 &&
+      eventSrc !== 1 &&
+      form.form.checkValidity() === false
+    ) {
       event.preventDefault();
       event.stopPropagation();
     } else {
       switch (eventSrc) {
         case 0:
           temp[eventSrc] = "section";
-          temp[eventSrc + 1] = "section is-active";
-
-          temp2[eventSrc - 1] = "step active";
+          temp[eventSrc + 2] = "section is-active";
+          temp2[eventSrc] = "step active";
+          temp2[eventSrc + 1] = "step active";
+          temp2[eventSrc + 2] = "step active";
+          this.checkOutClick();
           break;
         case 1:
           temp[eventSrc] = "section";
-          temp[eventSrc + 1] = "section is-active";
-          temp2[eventSrc] = "step active";
-          if (this.state.alreadyChecked === false) this.checkOutClick();
-          break;
-        case 2:
-          //temp[eventSrc] = "section";
-          //temp[eventSrc + 1] = "section is-active";
-          //temp2[eventSrc] = "step active";
+          temp[eventSrc] = "section is-active";
 
           break;
+        case 2:
+          temp[eventSrc - 1] = "section";
+          temp[eventSrc] = "section is-active";
+          temp2[eventSrc] = "step active";
+          temp2[eventSrc - 1] = "step active";
+          this.checkOutClick();
+          break;
         case 3: //here is the actual payment stuff!!!! add the API here
+          temp[eventSrc + 1] = "section";
+          temp[eventSrc + 1] = "section is-active";
+          temp2[eventSrc + 1] = "step active";
+
           break;
         default:
           break;
@@ -259,8 +275,10 @@ class MyCart extends Component<
         break;
       case 2:
         temp[eventSrc] = "section";
-        temp[eventSrc - 1] = "section is-active";
+        temp[eventSrc - 2] = "section is-active";
+        temp2[eventSrc - 2] = "step active";
         temp2[eventSrc - 1] = "step";
+        temp2[eventSrc] = "step";
         console.log("we are in 2");
         break;
       case 3:
@@ -284,73 +302,128 @@ class MyCart extends Component<
     let lockIds: any[] = [];
     let tempIds: string[] = [];
 
-    console.log(
-      lockIds,
-      JSON.parse(window.localStorage.getItem("lockIds") || "{}")
+    const localStre = JSON.parse(
+      window.localStorage.getItem("lockIds") || "{}"
     );
+
+    const localOrd = window.localStorage.getItem("paymentId") || "";
+
+    //lockIds = JSON.parse(window.localStorage.getItem("lockIds") || "{}");
+
     //I think before checkout we have to have them singUp...and have valid addresses...
     //switch to await promise all here!!!! will help later.
     //${list[1].split("T")[0]} ${list[2].split("T")[0]}
     try {
-      this.props.sessionStore.authUser
-        ? await this.props.itemStore.itemList.forEach(async (list: any) => {
-            await this.props.firebase
-              .readDateLocks(list[3])
-              .then(async (allItems: any) => {
-                await allItems.forEach((data: any) => {
-                  //check the dates at the first one break and result in a conflict message
-                  const serverStart = new Date(data.data()["start"]);
-                  const serverEnd = new Date(data.data()["end"]);
-                  if (
-                    serverStart.valueOf() >= new Date(list[1]).valueOf() &&
-                    serverEnd.valueOf() <= new Date(list[2]).valueOf()
-                  ) {
-                    conflict = true;
-                    console.log(list, serverStart.toDateString(), serverEnd);
-                    //template string for the toast
-                    toast.error(
-                      `Dates Taken for Item: ${list[0].Title}
+      if (true)
+        //this.state.alreadyChecked === false)
+        this.props.sessionStore.authUser
+          ? await this.props.itemStore.itemList.forEach(async (list: any) => {
+              console.log(
+                "item in the itemStore that we are looking at...: ",
+                list[3]
+              );
+              await this.props.firebase
+                .readDateLocks(list[3])
+                .then(async (allItems: any) => {
+                  await allItems.forEach((data: any) => {
+                    //check the dates at the first one break and result in a conflict message
+                    //we lso need to check whether the ID's already match for this item, if yes,
+                    //no need to throw an error.. this is to make sure that only new items get counted.
+                    const serverStart = new Date(data.data()["start"]);
+                    const serverEnd = new Date(data.data()["end"]);
+
+                    if (
+                      serverStart.valueOf() >= new Date(list[1]).valueOf() &&
+                      serverEnd.valueOf() <= new Date(list[2]).valueOf() &&
+                      Object.keys(localStre).length !== 0 &&
+                      localStre.lockedItems.find((obj: any) => {
+                        return obj.includes(data.id);
+                      }) === undefined
+                    ) {
+                      conflict = true;
+                      this.setState({ conflict: true });
+                      //template string for the toast
+                      toast.error(
+                        `Dates Taken for Item: ${list[0].Title}
 
                       Start: ${serverStart.toDateString()}
 
                       End: ${serverEnd.toDateString()}`
+                      );
+                    } else {
+                      this.setState({ newItemAdded: true });
+                    }
+                  });
+                })
+                .then(async () => {
+                  //if we have found no locks for the same item within the date range then add a lock and book
+                  //BUG here, if we find
+                  if (conflict === false) {
+                    await this.props.firebase
+                      .createTempLock(
+                        list[3],
+                        new Date(list[1]).toDateString(),
+                        new Date(list[2]).toDateString()
+                      )
+                      .then((doc: any) => {
+                        lockIds.push([list[3], doc.id]);
+                      });
+                    //store to local storage in the event that they navigate from page to the payment portal, this info
+                    //will be lost, so save in session and clear upon checkout success.
+
+                    window.localStorage.setItem(
+                      "lockIds",
+                      JSON.stringify({ lockedItems: lockIds })
                     );
                   }
                 });
-              })
-              .then(async () => {
-                //if we have found no locks for the same item within the date range then add a lock and book
-                if (conflict === false) {
-                  await this.props.firebase
-                    .createTempLock(
-                      list[3],
-                      new Date(list[1]).toDateString(),
-                      new Date(list[2]).toDateString()
-                    )
-                    .then((doc: any) => {
-                      lockIds.push([list[3], doc.id]);
-                    });
-                  //store to local storage in the event that they navigate from page to the payment portal, this info
-                  //will be lost, so save in session and clear upon checkout success.
-                  window.localStorage.setItem(
-                    "lockIds",
-                    JSON.stringify({ lockedItems: lockIds })
-                  );
-                }
-              });
-          })
-        : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
+            })
+          : toast.info(" Login/Sign Up Required "); //this.props.history.push("/signin");
     } catch (exception) {
       alert("Error in the order.");
     }
+    try {
+      this.props.itemStore.itemList.forEach(async (list: any) => {
+        tempIds.push(list[3]);
+      });
+    } catch (except) {
+      console.log("The following exception happened: ", except);
+    }
 
-    this.props.itemStore.itemList.forEach(async (list: any) => {
-      tempIds.push(list[3]);
-    });
+    //based on customer selection of address if available set the variables here...
 
-    if (conflict === false) {
-      this.props.firebase
-        .createCollatedOrder(
+    //So what is happpenning here: purely catering for when people aare stupid and
+    //leave the page and come back to pick up where they left off or have added to their basket,
+    // we do not want duplicate stuff in our DB
+    //{ we just need to check for a paymentId in local storage
+    try {
+      if (localOrd === "" && conflict === false) {
+        this.props.firebase
+          .createCollatedOrder(
+            this.props.firebase.auth.currentUser["uid"],
+            tempIds,
+            this.state.firstname,
+            this.state.lastname,
+            this.state.addressLine1,
+            this.state.addressLine2,
+            this.state.email,
+            this.state.contact,
+            this.state.Province,
+            this.state.city,
+            this.state.Suburb,
+            this.state.postalCode
+          )
+          .then((doc: any) => {
+            this.setState({ paymentPending: true });
+            this.setState({ paymentServerId: doc.id });
+            window.localStorage.setItem("paymentId", doc.id);
+            this.calcPaymentCheckSum();
+          });
+      } else if (conflict === false) {
+        //something changed -- maybe...
+        //if (this.state.addrChanged || this.state.newItemAdded)
+
+        this.props.firebase.updateBasketOrder(
           this.props.firebase.auth.currentUser["uid"],
           tempIds,
           this.state.firstname,
@@ -362,16 +435,35 @@ class MyCart extends Component<
           this.state.Province,
           this.state.city,
           this.state.Suburb,
-          this.state.postalCode
-        )
-        .then((doc: any) => {
-          this.setState({ paymentPending: true });
-          this.setState({ paymentServerId: doc.id });
-          window.localStorage.setItem("paymentId", doc.id);
-          this.calcPaymentCheckSum();
-        });
+          this.state.postalCode,
+          window.localStorage.getItem("paymentId")
+        );
+        this.calcPaymentCheckSum();
+        console.log("Somethin has chaned adding new stuf to basket");
+      }
+    } catch (except) {
+      console.log("The error occured in the update basket: ", except);
     }
-
+    try {
+      if (this.state.saveAddress) {
+        const addr_obj = {
+          addr1: this.state.addressLine1 || "",
+          addr2: this.state.addressLine2 || "",
+          sub: this.state.Suburb || "",
+          province: this.state.Province || "",
+          city: this.state.city || "",
+          zip: this.state.postalCode || "",
+          friendlyName: this.state.addrNick || "",
+        };
+        console.log(addr_obj, this.props.firebase.auth.currentUser["uid"]);
+        this.props.firebase.updateAddrList(
+          this.props.firebase.auth.currentUser["uid"],
+          addr_obj
+        );
+      }
+    } catch (exception) {
+      console.log("Attempting to update the address:", exception);
+    }
     this.setState({ alreadyChecked: true });
   }
 
@@ -386,31 +478,25 @@ class MyCart extends Component<
             this.setState({ lastname: _doc.data().lastname });
             this.setState({ email: _doc.data().email });
             this.setState({ number: _doc.data().number });
-            this.setState({ address: _doc.data().address });
+            this.setState({ address: _doc.data().address_list });
             this.setState({ suburb: _doc.data().suburb });
             this.setState({ province: _doc.data().province });
             this.setState({ areacode: _doc.data().areacode });
             this.setState({ terms: _doc.data().terms });
+
+            if (this.state.address.length > 0) {
+              console.log(
+                " just checking the address stuff: ",
+                this.state.address.length
+              );
+              var tempState = [...this.state.classState];
+
+              tempState[0] = "section is-active";
+              tempState[1] = "section";
+              this.setState({ classState: tempState });
+            }
           });
 
-          this.props.firebase
-            .readDeliveryAddr(user.uid)
-            .then((doc: any) => {
-              var tempList: any = [];
-              doc.forEach((data: any) => {
-                tempList.push(data.data());
-                this.setState({ addrList: tempList });
-              });
-            })
-            .then((result: any) => {
-              var tempState = [...this.state.classState];
-              if (this.state.addrList.length > 0) {
-              } else {
-                tempState[0] = "section";
-                tempState[1] = "section is-active";
-                this.setState({ classState: tempState });
-              }
-            });
           this.setState({ userId: user.uid });
         } else {
           this.setState({ noUser: true });
@@ -456,9 +542,65 @@ class MyCart extends Component<
                     action="https://sandbox.payfast.co.za​/eng/process"
                     method="post"
                   >
-                    {this.state.addrList.length > 0 ? (
+                    {this.state.address.length > 0 ? (
                       <fieldset className={this.state.classState[0]}>
                         <h3>Select Delivery Address</h3>
+                        <div>
+                          {this.state.address.map(
+                            (data: any, index: number) => {
+                              return (
+                                <div className="form-check" key={uuidv4()}>
+                                  <input
+                                    name="checkCheck"
+                                    className="form-check-input"
+                                    type="radio"
+                                    id={"check"}
+                                    key={uuidv4()}
+                                    onChange={() => {}}
+                                    onClick={(e: any) => {
+                                      let q = 0;
+                                      q ^= 1 << index;
+                                      this.setState({ tickIndex: q });
+                                    }}
+                                    checked={
+                                      this.state.tickIndex - 1 === index
+                                        ? true
+                                        : false
+                                    }
+                                  ></input>
+                                  <label
+                                    className="form-check-label"
+                                    htmlFor={"check" + index.toString()}
+                                    key={uuidv4()}
+                                  >
+                                    {data.friendlyName}
+                                  </label>
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+                        <button
+                          className="button"
+                          name="0"
+                          onClick={this.formBtnClick}
+                          disabled={this.state.tickIndex > 0 ? false : true}
+                          style={
+                            this.state.tickIndex > 0
+                              ? { backgroundColor: "#3498db" }
+                              : { backgroundColor: "grey" }
+                          }
+                        >
+                          To Payment
+                        </button>
+                        <button
+                          className="button"
+                          name="1"
+                          onClick={this.formBtnClick}
+                          style={{ left: "20px" }}
+                        >
+                          New Address?
+                        </button>
                       </fieldset>
                     ) : null}
                     <fieldset className={this.state.classState[1]}>
@@ -711,7 +853,7 @@ class MyCart extends Component<
 
                       <button
                         className="button"
-                        name="1"
+                        name="2"
                         onClick={this.formBtnClick}
                       >
                         Next
@@ -821,7 +963,17 @@ class MyCart extends Component<
                         name="signature"
                         value={this.state.hashMd5 || ""}
                       />
-                      <button className="button" name="2" type="submit">
+                      <button
+                        className="button"
+                        name="2"
+                        type="submit"
+                        disabled={this.state.conflict === false ? false : true}
+                        style={
+                          this.state.conflict === false
+                            ? { backgroundColor: "#3498db" }
+                            : { backgroundColor: "grey" }
+                        }
+                      >
                         <FontAwesomeIcon icon={faCreditCard} />
                         Pay Now
                       </button>

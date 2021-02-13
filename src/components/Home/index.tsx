@@ -19,13 +19,17 @@ import books from "../../assets/books.jpg";
 import crafts from "../../assets/crafts.jpg";
 import outdoor from "../../assets/outdoor.jpg";
 import Information from "../Information";
+import { withFirebase } from "../Firebase";
 
-class Home extends Component<{ firebase: any; history: any }, any> {
+class Home extends Component<
+  { firebase: any; history: any; sessionStore: any },
+  any
+> {
   constructor(props: any) {
     super(props);
     this.state = {
       searchInput: "",
-      showModal: true,
+      showModal: false,
     };
     this.keyPressed = this.keyPressed.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -63,6 +67,8 @@ class Home extends Component<{ firebase: any; history: any }, any> {
     this.setState({
       showModal: !this.state.showModal,
     });
+
+    toast.success("Personal Information Updated!");
   }
 
   onChange = (event: any) => {
@@ -93,6 +99,32 @@ class Home extends Component<{ firebase: any; history: any }, any> {
       this.props.history.push("/search", {
         fromNotifications: this.state.searchInput,
       });
+    }
+  }
+
+  componentDidMount() {
+    //check if the account has profile information on first log in and etc... if it does not then
+    //push this to the main screen whilst they add the information...
+    try {
+      this.props.firebase.onAuthUserListener(
+        (authUser: any) => {
+          //user logged in here....
+          this.props.firebase
+            .doReadSingleDoc(this.props.firebase.auth.currentUser["uid"])
+            .then((_doc: any) => {
+              console.log(_doc.data());
+              if (_doc.data().address_list === undefined) {
+                this.setState({ showModal: true });
+              }
+            });
+        },
+        () => {
+          //no ouser logged in meow
+          console.log("no user logged in meow.. do not display pop up");
+        }
+      );
+    } catch (Exception) {
+      console.log(Exception);
     }
   }
 
@@ -174,6 +206,7 @@ class Home extends Component<{ firebase: any; history: any }, any> {
             <Information
               closePopUp={this.viewNewItemForm.bind(this)}
               show={this.state.showModal}
+              firebase={this.props.firebase}
             />
           </>
         ) : null}
@@ -186,5 +219,6 @@ export default compose(
   inject("sessionStore"),
   inject("itemStore"),
   observer,
-  withRouter
+  withRouter,
+  withFirebase
 )(Home);

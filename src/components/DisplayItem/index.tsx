@@ -46,6 +46,10 @@ class DisplayItem extends Component<
 
   componentDidMount() {
     let tempDates: Date[] = [];
+    console.log(
+      "Ther ID from the Search is: ",
+      this.props.location.state.selectedID
+    );
     this.setState({ data: this.props.location.state.fromNotifications });
     try {
       this.props.firebase
@@ -103,7 +107,7 @@ class DisplayItem extends Component<
 
   addToCart() {
     //Do a quick check for cart dates correctness.. error checking...
-
+    console.log("adding item to cart", this.state.data);
     if (this.state.startDate.getTime() <= this.state.endDate.getTime()) {
       this.props.itemStore.addItems(
         this.state.data,
